@@ -1,4 +1,4 @@
-# kangxi encoded radicals (U+2F00-U+2FDF) - from https://www.localizingjapan.com/blog/2012/01/20/regular-expressions-for-japanese-text/
+# kangxi + suppliment radicals [2E80-2FD5] - from https://www.localizingjapan.com/blog/2012/01/20/regular-expressions-for-japanese-text/
 ⺀
 ⺁
 ⺂
@@ -15,10 +15,10 @@
 ⺍
 ⺎
 ⺏
-⺐
+# ⺐ homoglyph of 2F2A
 ⺑
 ⺒
-⺓
+# ⺓ duplicate
 ⺔
 ⺕
 ⺖
@@ -42,7 +42,7 @@
 ⺨
 ⺩
 ⺪
-⺫
+# ⺫ duplicate
 ⺬
 ⺭
 ⺮
@@ -61,7 +61,7 @@
 ⺻
 ⺼
 ⺽
-⺾
+⺾ 
 ⺿
 ⻀
 ⻁
@@ -75,10 +75,10 @@
 ⻉
 ⻊
 ⻋
-⻌
+# ⻌ duplicate
 ⻍
 ⻎
-⻏
+#⻏ duplicate
 ⻐
 ⻑
 ⻒

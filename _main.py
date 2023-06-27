@@ -3,6 +3,7 @@ import csv
 from typing import List
 from kanjivg import Stroke, isKanji, realord
 from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
+from my_code.radicals import get_radicals
 from my_code.unicode import to_homoglyph
 
 from utils import canonicalId, listSvgFiles
@@ -32,16 +33,7 @@ with open("my_files/kanji_radical_mapping.csv", "r", encoding="utf8") as mapping
         (kanji, radical, *a) = row
         radical_kanji_mapping[hex_to_unicode_str(radical)] = hex_to_unicode_str(kanji)
 
-kangxi_radicals = set()
-with open("my_files/radicals_kangxi.tsv", "r", encoding="utf8") as radical_file:
-    tsv_reader = csv.reader(radical_file, delimiter="\t")
 
-    # Skip the first row, which is just the source link
-    next(tsv_reader)
-
-    for row in tsv_reader:
-        radical = row[0]
-        kangxi_radicals.add(to_homoglyph(radical))
 
 # han_radicals = []
 # for radical in kangxi_radicals:
@@ -52,19 +44,41 @@ with open("my_files/radicals_kangxi.tsv", "r", encoding="utf8") as radical_file:
 #     if s != "":
 #         han_radicals.append(s)
 
-radicals = kangxi_radicals # + han_radicals
-
+# Load all characters
 joyo_kanji = get_joyo_kanji()
+print(f"joyo_kanji: {len(joyo_kanji)}")
+joyo_kanji = set(map(to_homoglyph, joyo_kanji)).intersection(joyo_kanji)
+print(f"joyo_kanji: {len(joyo_kanji)}")
+
+radicals = get_radicals()
+print(f"radicals: {len(radicals)}")
+radicals = set(map(to_homoglyph, radicals)).intersection(radicals)
+print(f"radicals: {len(radicals)}")
+
 jinmeiyo_kanji = get_jinmeiyo_kanji()
+print(f"jinmeiyo: {len(jinmeiyo_kanji)}")
+jinmeiyo_kanji = set(map(to_homoglyph, jinmeiyo_kanji)).intersection(jinmeiyo_kanji)
+print(f"jinmeiyo: {len(jinmeiyo_kanji)}")
+
+hyogai_kanji = {'囬', '廌'}
+
+# Ensure no overlapping characters
+assert radicals.isdisjoint(joyo_kanji)
+assert joyo_kanji.isdisjoint(jinmeiyo_kanji)
+assert radicals.isdisjoint(jinmeiyo_kanji)
+
+
 valid_kanji = joyo_kanji.union(jinmeiyo_kanji)
 # This one is not in the joyo kanji list, but is used in the kanji-svg database
 valid_kanji.add('并')
 # Name kanji not in jinmeiyo kanji list
 valid_kanji.add('滕')
 # Radical not in radicals list
-valid_kanji = valid_kanji.union({'咼', '帀', '㠯', '𠂉', '𧘇', '卪'})
+valid_kanji = valid_kanji.union({'咼', '帀', '㠯', '𠂉', '𧘇', '卪', '丆', '囬', '⺈', '𠂊', 'ᚇ', '𠀉', '𧰨'})
+valid_kanji = valid_kanji.union(hyogai_kanji)
 
 # 帀 composition 一 + ⼱
+a = to_homoglyph("咼")
 
 kanji = "鬱" # Most strokes in kanji&stroke
 kanji = "食" # Most strokes in kanji&radicals
@@ -113,11 +127,13 @@ def reduce_parts(strokes: List[str]):
         ('丿,丶', '冫'), # Technically correct, could lead to more issues down the line...
         
         # Probably bad rules
-        # ('艹', '卄'), # They look the same :D
         ('㇂*,丿,丶', '义'), # Missing hook, not a huge fan of this one.
         ('㇂*,㇒*,㇔*', '义'), # Missing hook, not a huge fan of this one.
         ('㇒*,㇏*', '𠆢'), 
+        # ('艹', '卄'), # They look the same :D
         # ('𠆢', '人'), 
+        # ('⺈', '𠂊')
+        
     ]
     strokes_str = ','.join(strokes)
     for (match, result) in rules:
@@ -127,6 +143,7 @@ def reduce_parts(strokes: List[str]):
         # result = "".join(map(lambda c : to_homoglyph(c), result))
         
         if match in strokes_str:
+            print(f"Reducing {strokes_str} to {result} in {kanji}")
             strokes_str = strokes_str.replace(match, result)
     
     # Split and remove empty strings
@@ -171,6 +188,9 @@ for kanji in joyo_kanji:
     kanji_id = canonicalId(kanji)
     svg_files = [(f.path, f.read()) for f in svg_file_list if f.id == kanji_id]
     path, kanji_info = svg_files[0] # Select the first one
+    if "MdFst" in path or "MidFst" in path:
+        path, kanji_info = svg_files[1] # Select the second one
+
     kanji_strokes = kanji_info.strokes
     kanji = kanji_strokes.element
 
@@ -200,6 +220,10 @@ for kanji in kanji_parts:
 
     print(f"{kanji} part of {kanji_dict[kanji]['part_of']}, contains {kanji_dict[kanji]['comp_kanji']}, radicals {kanji_dict[kanji]['comp_kanji&radicals']}, strokes {kanji_dict[kanji]['comp_kanji&strokes']}")
 
+print()
+print()
+print()
+print()
 # How many have more than 'max_comps' components?
 radical_comps = [
     (
@@ -228,7 +252,9 @@ seen_strokes = set()
 seen_radicals = set()
 seen_other = set()
 seen_name_kanji = set()
+seen_components = 0
 for kanji in joyo_kanji:
+    seen_components += len(kanji_dict[kanji]['comp_preferred'])
     for part in kanji_dict[kanji]['comp_preferred']:
         if part not in joyo_kanji:
             if '*' in part: 
@@ -248,4 +274,5 @@ print(f"User will encounter {len(seen_name_kanji)} name kanji")
 print(seen_name_kanji)
 print(f"User will encounter {len(seen_other)} extra kanji")
 print(seen_other)
+print(f"User will encounter {seen_components} components")
 print(len(joyo_kanji))

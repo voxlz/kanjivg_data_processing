@@ -7,6 +7,8 @@
 #
 # Source code for this project available from: http://github.com/codebox/homoglyph
 #
+# THIS DOC HAS BEEN EDITED: See # comments below
+#
 20,a0,1680,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,200a,2028,2029,202f,205f
 21,1c3,2d51,ff01
 24,ff04
@@ -627,6 +629,7 @@ fd6,534d
 2c76,ab80
 2ce8,101a0
 2d40,102b8
+# Radicals block starts here
 2e82,31d6,4e5b
 2e83,31df,4e5a
 2e85,30a4,4ebb
@@ -659,7 +662,10 @@ fd6,534d
 2eb1,7f53
 2eb9,8002
 2eba,8080
-2ebe,2ebf,2ec0,8279,fa5d,fa5e
+# Split up the grass radicals (3 following lines)
+2ebe,8279
+2ebf,fa5e
+2ec0,fa5d
 2ec1,864e
 2ec2,8864
 2ec3,8980
@@ -915,6 +921,7 @@ fd6,534d
 2fd3,9f8d,f9c4
 2fd4,9f9c,f907,f908,face
 2fd5,9fa0
+# Radical block ends here
 301c,ff5e
 3039,5344
 303a,5345
