@@ -1,5 +1,6 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
 import csv
+import random
 from typing import List
 from kanjivg import Stroke, isKanji, realord
 from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
@@ -9,7 +10,7 @@ from my_code.unicode import to_homoglyph
 from utils import canonicalId, listSvgFiles
 
 # Program limits
-max_comps = 6 # how many kanji parts to allow in UI for a single kanji
+max_comps = 5 # how many kanji parts to allow in UI for a single kanji
 
 # List of radicals to accept to reduce the number of components a kanji can have. Let's say... 8 components max.
 radicals_8 = []
@@ -60,7 +61,7 @@ print(f"jinmeiyo: {len(jinmeiyo_kanji)}")
 jinmeiyo_kanji = set(map(to_homoglyph, jinmeiyo_kanji)).intersection(jinmeiyo_kanji)
 print(f"jinmeiyo: {len(jinmeiyo_kanji)}")
 
-hyogai_kanji = {'囬', '廌'}
+hyougai_kanji = {'囬', '廌', '兹'}
 
 # Ensure no overlapping characters
 assert radicals.isdisjoint(joyo_kanji)
@@ -74,8 +75,8 @@ valid_kanji.add('并')
 # Name kanji not in jinmeiyo kanji list
 valid_kanji.add('滕')
 # Radical not in radicals list
-valid_kanji = valid_kanji.union({'咼', '帀', '㠯', '𠂉', '𧘇', '卪', '丆', '囬', '⺈', '𠂊', 'ᚇ', '𠀉', '𧰨'})
-valid_kanji = valid_kanji.union(hyogai_kanji)
+valid_kanji = valid_kanji.union({'咼', '帀', '㠯', '𠂉', '𧘇', '卪', '丆', '囬', '⺈', '𠂊', 'ᚇ', '𠀉', '𧰨', '𠀎', '朿', '龶', '玄'})
+valid_kanji = valid_kanji.union(hyougai_kanji)
 
 # 帀 composition 一 + ⼱
 a = to_homoglyph("咼")
@@ -115,6 +116,7 @@ def reduce_parts(strokes: List[str]):
         ('㇕*,一,一', '彐'),
         ('一,㇑,㇑,㇑,㇑', '卌'),
         ('一,㇑,㇑,㇑', '卅'),
+        ('一,㇑,㇑,一,一', '𠀎'),
         ('一,㇑,㇑', '卄'),
         ('一,一,一', '三'),
         ('一,一', '二'),
@@ -122,6 +124,15 @@ def reduce_parts(strokes: List[str]):
         ('㇑,㇕*,一,㇕*,一', '㠯'),
         ('㇑,㇕*,㇔*', '卪'),
         ('㇔*,㇒*', '丷'),
+        ('人,一,口,人', '㑒'),
+        ('㇑,㇕*', '⨅'),
+        ('㇒*,㇔*', '八'),
+        ('㇒*,㇚*', '刂'),
+        ('三,㇑', '龶'),
+        ('人,人,人,人', '𠈌'),
+        ('㇆*,㇔*,㇀*', '习'),
+        
+        
         
         # Questionable rules
         ('丿,丶', '冫'), # Technically correct, could lead to more issues down the line...
@@ -143,7 +154,8 @@ def reduce_parts(strokes: List[str]):
         # result = "".join(map(lambda c : to_homoglyph(c), result))
         
         if match in strokes_str:
-            print(f"Reducing {strokes_str} to {result} in {kanji}")
+            if match not in ['㇐*','㇑*']: 
+                print(f"Reducing {strokes_str} to {result} in {kanji}")
             strokes_str = strokes_str.replace(match, result)
     
     # Split and remove empty strings
@@ -170,9 +182,10 @@ def get_components(kanji_obj, depth = 0, joyo = True):
         if isKanji or (isRadical and not joyo):
             return [elem]
         
-        # NOTE: regarding kanji_obj.original
-        # Using the kanji_obj.original might reduce the number of radicals to learn, however
-        # - Original character is not necessary a used kanji.
+        # NOTE: kanji_obj.original
+        # Using the kanji_obj.original might reduce the number 
+        # of radicals to learn, however:
+        # - Original character is not necessary a joyo kanji.
         # - May have different stroke order / strokes amount, confusing learners.
     
     result = []
@@ -194,19 +207,27 @@ for kanji in joyo_kanji:
     kanji_strokes = kanji_info.strokes
     kanji = kanji_strokes.element
 
-    comp_from_VG = kanji_strokes.components(recursive=True)
-    comp_without_radicals = get_components(kanji_strokes)
-    comp_with_radicals = reduce_parts(get_components(kanji_strokes, joyo = False))
-
-    kanji_parts[kanji] = comp_without_radicals
-    kanji_dict[kanji] = {
-        'comp_kanji': [kanji for kanji in comp_without_radicals if kanji in valid_kanji],
-        'comp_kanji&radicals': comp_with_radicals, # Kanji, radicals and strokes
-        'comp_kanji&strokes': comp_without_radicals, # Only kanji and strokes
-        'comp_preferred': reduce_parts(comp_without_radicals if len(comp_without_radicals) < max_comps else comp_with_radicals),
+    joyo_comp_tree = {
+        '断': {
+            '米': {},
+            '㇗*': {},
+            '斤': {}
+        },
     }
 
-    kanji_parts[kanji] = comp_without_radicals
+    comps = get_components(kanji_strokes, joyo = False)
+    comp_with_radicals = reduce_parts(comps)
+
+    if random.randint(0, 100) == 0:
+        print()
+
+    kanji_parts[kanji] = comp_with_radicals
+    kanji_dict[kanji] = {
+        'comp_kanji': [k for k in comp_with_radicals if k in valid_kanji],
+        'comp_kanji&radicals': comp_with_radicals, # Kanji, radicals and strokes
+        'comp_kanji&strokes': comp_with_radicals, # Only kanji and strokes
+        'comp_preferred': comp_with_radicals,
+    }
     # print(comp_elems)
 
 # Calculate a dependency tree for each kanji
@@ -218,7 +239,7 @@ for kanji in kanji_parts:
         'part_of': [parent for parent, p_parts in kanji_parts.items() if kanji in p_parts],
     } | kanji_dict[kanji]
 
-    print(f"{kanji} part of {kanji_dict[kanji]['part_of']}, contains {kanji_dict[kanji]['comp_kanji']}, radicals {kanji_dict[kanji]['comp_kanji&radicals']}, strokes {kanji_dict[kanji]['comp_kanji&strokes']}")
+    print(f"{kanji} part of {kanji_dict[kanji]['part_of']}, contains {kanji_dict[kanji]['comp_preferred']}")
 
 print()
 print()
@@ -238,12 +259,9 @@ print(f"More than {max_comps} components: {len(above_x_comps)}")
 for kanji, comps, num_comps in above_x_comps:
     print(f"{kanji} has {num_comps} components: {comps}")
 
-# Manually group certain strokes together to reduce the number of components
-kanji_dict['食'] = kanji_dict['食'] | { 'comp_preferred': (["𠆢"] + (kanji_dict['食']['comp_preferred'][2:]))}
 
 
 
-        
 
 
 # Ideally we want to minimize the amount of radicals the user will have to learn, since they are not kanji themselves.
@@ -276,3 +294,6 @@ print(f"User will encounter {len(seen_other)} extra kanji")
 print(seen_other)
 print(f"User will encounter {seen_components} components")
 print(len(joyo_kanji))
+
+# Most repeated component in a kanji? 
+# 傘 has 6 components: ['人', '人', '人', '人', '人', '十']
