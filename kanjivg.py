@@ -98,7 +98,7 @@ class StrokeGr:
 	def __init__(self, parent = None):
 		self.parent = parent
 		if parent: parent.childs.append(self)
-		# Element of strokegr
+		# Element of StrokeGr
 		self.element = None
 		# A more common, safer element this one derives of
 		self.original = None
@@ -223,11 +223,13 @@ class Stroke:
 			out.write("\t" * indent + '<text transform="matrix(1 0 0 1 %.2f %.2f)">%d</text>\n' % (self.numberPos[0], self.numberPos[1], number)) 
 
 	def toSVG(self, out, rootId, groupCpt, strCpt, indent = 0):
-		pid = rootId + "-s" + str(strCpt[0])
+		pid = f"{rootId}-s{str(strCpt[0])}"
 		strCpt[0] += 1
-		s = "\t" * indent + '<path id="kvg:%s"' % (pid,)
-		if self.stype: s += ' kvg:type="%s"' % (self.stype,)
-		if self.svg: s += ' d="%s"' % (self.svg)
+		s = "\t" * indent + f'<path id="kvg:{pid}"'
+		if self.stype:
+			s += f' kvg:type="{self.stype}"'
+		if self.svg:
+			s += f' d="{self.svg}"'
 		s += '/>\n'
 		out.write(s)
 

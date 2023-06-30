@@ -1,13 +1,10 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
-import csv
-import random
 from typing import List
-from kanjivg import Stroke, isKanji, realord
-from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
-from my_code.radicals import get_radicals
+from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji, get_valid_kanji
+from my_code.kanjivg_utils import get_comp_list, get_components, load_kanji, reduce_tree
+from my_code.radicals import get_radicals, get_strokes
+from my_code.tree import Tree
 from my_code.unicode import to_homoglyph
-
-from utils import canonicalId, listSvgFiles
 
 # Program limits
 max_comps = 5 # how many kanji parts to allow in UI for a single kanji
@@ -19,216 +16,73 @@ radicals_8 = []
 import importlib
 clear_cache = importlib.invalidate_caches()
 
-# Load all radicals
-def hex_to_unicode_str(hex_str):
-    return hex_str.replace("0x", "\\u").encode('utf-8').decode('unicode-escape')
+def remove_duplicates(char_set, name):
+    ''' Remove homoglyph duplicates from a set of
+    characters with to_homoglyph. '''
+    
+    old_len = len(char_set)
+    pref_chars = set(map(to_homoglyph, char_set))
+    char_set = pref_chars.intersection(char_set)
+    # removed = pref_chars.difference(char_set)
+    print(f"{name}: {old_len} -> {len(char_set)} (-{old_len - len(char_set)})")
+    return char_set
 
-radical_kanji_mapping = {}
-with open("my_files/kanji_radical_mapping.csv", "r", encoding="utf8") as mapping:
-    tsv_reader = csv.reader(mapping, delimiter=",")
-
-    # Skip the first row, which is just the source link
-    next(tsv_reader)
-
-    for row in tsv_reader:
-        (kanji, radical, *a) = row
-        radical_kanji_mapping[hex_to_unicode_str(radical)] = hex_to_unicode_str(kanji)
-
-
-
-# han_radicals = []
-# for radical in kangxi_radicals:
-#     s = unicodedata.decomposition(radical) # Not all radicals have a decomposition
-#     s = s.replace("<compat> ", "\\u").encode('utf-8').decode('unicode-escape')
-#     if s == "" and radical in radical_kanji_mapping:
-#         s = radical_kanji_mapping[radical]
-#     if s != "":
-#         han_radicals.append(s)
-
-# Load all characters
-joyo_kanji = get_joyo_kanji()
-print(f"joyo_kanji: {len(joyo_kanji)}")
-joyo_kanji = set(map(to_homoglyph, joyo_kanji)).intersection(joyo_kanji)
-print(f"joyo_kanji: {len(joyo_kanji)}")
-
-radicals = get_radicals()
-print(f"radicals: {len(radicals)}")
-radicals = set(map(to_homoglyph, radicals)).intersection(radicals)
-print(f"radicals: {len(radicals)}")
-
-jinmeiyo_kanji = get_jinmeiyo_kanji()
-print(f"jinmeiyo: {len(jinmeiyo_kanji)}")
-jinmeiyo_kanji = set(map(to_homoglyph, jinmeiyo_kanji)).intersection(jinmeiyo_kanji)
-print(f"jinmeiyo: {len(jinmeiyo_kanji)}")
-
-hyougai_kanji = {'囬', '廌', '兹'}
+# Load all characters - Circular bullshit
+joyo        = get_joyo_kanji()
+strokes     = remove_duplicates(get_strokes(), 'strokes')
+radicals    = remove_duplicates(get_radicals(), 'radicals')
+jinmeiyo    = remove_duplicates(get_jinmeiyo_kanji(), 'jinmeiyo')
 
 # Ensure no overlapping characters
-assert radicals.isdisjoint(joyo_kanji)
-assert joyo_kanji.isdisjoint(jinmeiyo_kanji)
-assert radicals.isdisjoint(jinmeiyo_kanji)
+assert radicals.isdisjoint(joyo)
+assert joyo.isdisjoint(jinmeiyo)
+assert radicals.isdisjoint(jinmeiyo)
 
 
-valid_kanji = joyo_kanji.union(jinmeiyo_kanji)
-# This one is not in the joyo kanji list, but is used in the kanji-svg database
-valid_kanji.add('并')
-# Name kanji not in jinmeiyo kanji list
-valid_kanji.add('滕')
-# Radical not in radicals list
-valid_kanji = valid_kanji.union({'咼', '帀', '㠯', '𠂉', '𧘇', '卪', '丆', '囬', '⺈', '𠂊', 'ᚇ', '𠀉', '𧰨', '𠀎', '朿', '龶', '玄'})
-valid_kanji = valid_kanji.union(hyougai_kanji)
 
-# 帀 composition 一 + ⼱
-a = to_homoglyph("咼")
-
-kanji = "鬱" # Most strokes in kanji&stroke
-kanji = "食" # Most strokes in kanji&radicals
-kanji = "駦" # First contraction found
-kanji = "王" # Joyo kanji according to jisho, but not in kanji-svg database
-kanji = "鹿" # Joyo kanji according to jisho, but not in kanji-svg database
-lookup = kanji in valid_kanji
-chinese = isKanji(realord(kanji)) # Check if kanji is real, does not mean it's used in japanese.
-print(f"Is {kanji} in joyo kanji list? {lookup}")
-print(f"Is {kanji} a Han character? {chinese}")
-
-# Looks like some radicals have multiple unicode entries. Mapped with the .decomposition() function.
-print(f"Is 亠 the same as ⼇? {'亠' == '⼇'}")
-print('亠'.encode("unicode_escape"))
-print('⼇'.encode("unicode_escape"))
-
-# Looks like some characters look identical but are not the same unicode character. Unnecessary complexity for our purposes.
-print(f"Is ㇁ the same as ㇓? {'㇁' == '㇓'}")
-print('㇁'.encode("unicode_escape"))
-print('㇓'.encode("unicode_escape"))
-
-print(f'Is 扌 in radicals? {"扌" in radicals}')
-
-weird_kanji = ['哀']
-
+    
 def reduce_parts(strokes: List[str]):
     # '醸' = ['酉', '六', '一', '㇑*', '㇑*', '一', '一', '㇒*', '㇙*', '㇒*', '㇏*'] => ['酉', '六', '一', '㇑*', '㇑*', '二', '𧘇']
-    rules = [
-        ('㇐*', '一'), # ㇐* => 一 simplifies rules
-        ('㇑*', '㇑'), # ㇐* => 一 simplifies rules
-        ('一,巾','帀'),
-        ('㇒*,㇙*,㇒*,㇏*', '𧘇'),
-        ('㇑,㇑,㇔*,㇒*,一', '业'),
-        ('㇕*,一,一', '彐'),
-        ('一,㇑,㇑,㇑,㇑', '卌'),
-        ('一,㇑,㇑,㇑', '卅'),
-        ('一,㇑,㇑,一,一', '𠀎'),
-        ('一,㇑,㇑', '卄'),
-        ('一,一,一', '三'),
-        ('一,一', '二'),
-        ('㇒*,㇑,㇒*,㇔*', '𧘇'),
-        ('㇑,㇕*,一,㇕*,一', '㠯'),
-        ('㇑,㇕*,㇔*', '卪'),
-        ('㇔*,㇒*', '丷'),
-        ('人,一,口,人', '㑒'),
-        ('㇑,㇕*', '⨅'),
-        ('㇒*,㇔*', '八'),
-        ('㇒*,㇚*', '刂'),
-        ('三,㇑', '龶'),
-        ('人,人,人,人', '𠈌'),
-        ('㇆*,㇔*,㇀*', '习'),
-        
-        
-        
-        # Questionable rules
-        ('丿,丶', '冫'), # Technically correct, could lead to more issues down the line...
-        
-        # Probably bad rules
-        ('㇂*,丿,丶', '义'), # Missing hook, not a huge fan of this one.
-        ('㇂*,㇒*,㇔*', '义'), # Missing hook, not a huge fan of this one.
-        ('㇒*,㇏*', '𠆢'), 
-        # ('艹', '卄'), # They look the same :D
-        # ('𠆢', '人'), 
-        # ('⺈', '𠂊')
-        
-    ]
     strokes_str = ','.join(strokes)
-    for (match, result) in rules:
-        
-        # normalize the rules
-        # match = "".join(map(lambda c : to_homoglyph(c), match))
-        # result = "".join(map(lambda c : to_homoglyph(c), result))
+    for (match, result) in reduction_rules:
         
         if match in strokes_str:
-            if match not in ['㇐*','㇑*']: 
-                print(f"Reducing {strokes_str} to {result} in {kanji}")
+            # if match not in ['㇐*','㇑*']: 
+            #     print(f"Reducing {strokes_str} to {result} in {kanji}")
             strokes_str = strokes_str.replace(match, result)
     
     # Split and remove empty strings
     return list(filter(lambda c: c, strokes_str.split(',')))
 
-
-def get_components(kanji_obj, depth = 0, joyo = True):
-    ''' Recursively move down the tree until you find a joyo kanji, radical or stroke. Returns a list of components.
-    '''
-    
-    # If we have reached a stroke without hitting a kanji, return the stroke
-    if type(kanji_obj) is Stroke:
-        return [f"{kanji_obj.stype[0]}*"] # stroke typically (type, connection)
-
-    # Unless we are at the top level, we want to add the current kanji to the list of parts
-    isComplete = kanji_obj.part is None
-    # isPartial =  kanji_obj.partial == "true"
-
-    if (depth != 0 and isComplete):
-        elem = to_homoglyph(kanji_obj.element)
-        isRadical   = elem in radicals
-        isKanji     = elem in valid_kanji
-        
-        if isKanji or (isRadical and not joyo):
-            return [elem]
-        
-        # NOTE: kanji_obj.original
-        # Using the kanji_obj.original might reduce the number 
-        # of radicals to learn, however:
-        # - Original character is not necessary a joyo kanji.
-        # - May have different stroke order / strokes amount, confusing learners.
-    
-    result = []
-    for child in kanji_obj.childs:
-        result.extend(get_components(child, depth + 1, joyo))
-    return result
-
 # Look up all joyo kanji in the kanji-svg database
 kanji_parts = {}
 kanji_dict = {}
-svg_file_list = listSvgFiles("./kanji/")
-for kanji in joyo_kanji:
-    kanji_id = canonicalId(kanji)
-    svg_files = [(f.path, f.read()) for f in svg_file_list if f.id == kanji_id]
-    path, kanji_info = svg_files[0] # Select the first one
-    if "MdFst" in path or "MidFst" in path:
-        path, kanji_info = svg_files[1] # Select the second one
+joyo_tree = {}
 
-    kanji_strokes = kanji_info.strokes
-    kanji = kanji_strokes.element
 
-    joyo_comp_tree = {
-        '断': {
-            '米': {},
-            '㇗*': {},
-            '斤': {}
-        },
-    }
-
-    comps = get_components(kanji_strokes, joyo = False)
+for kanji in ['臣', '形' ]:
+    kanji_obj = load_kanji(kanji)
+    kanji = kanji_obj.element
+    
+    comps = get_components(kanji_obj, joyo = False)
+    comp_tree = get_comp_list(kanji_obj)
     comp_with_radicals = reduce_parts(comps)
 
-    if random.randint(0, 100) == 0:
-        print()
-
+    # if random.randint(0, 100) == 0:
+    #     print()
+    joyo_tree[kanji] = comp_tree
     kanji_parts[kanji] = comp_with_radicals
     kanji_dict[kanji] = {
-        'comp_kanji': [k for k in comp_with_radicals if k in valid_kanji],
+        'comp_kanji': [k for k in comp_with_radicals if k in get_valid_kanji()],
         'comp_kanji&radicals': comp_with_radicals, # Kanji, radicals and strokes
         'comp_kanji&strokes': comp_with_radicals, # Only kanji and strokes
         'comp_preferred': comp_with_radicals,
     }
     # print(comp_elems)
+
+reduce_tree([joyo_tree])
+
+print()
 
 # Calculate a dependency tree for each kanji
 for kanji in kanji_parts:
@@ -252,7 +106,7 @@ radical_comps = [
         kanji_dict[kanji]['comp_preferred'],
         len(kanji_dict[kanji]['comp_preferred']),
     )
-    for kanji in joyo_kanji
+    for kanji in joyo
 ]
 above_x_comps = list(filter(lambda x: x[2] > max_comps, radical_comps))
 print(f"More than {max_comps} components: {len(above_x_comps)}")
@@ -260,8 +114,19 @@ for kanji, comps, num_comps in above_x_comps:
     print(f"{kanji} has {num_comps} components: {comps}")
 
 
+# # Goal: Minimize components. Going through joyo tree, note down all encountered characters, and save their most reduced form.
+# def find_most_reduced_form(list_of_chars):
+#     ''' Recursively find the most reduced form of a tree of components. Input [{}]. '''
+    
+#     most_reduced = Tree()
+    
+#     for chars in list_of_chars:
+#         for (char, comps) in chars.items():
+#             print()
+    
+#     return most_reduced
 
-
+# find_most_reduced_form([joyo_tree])
 
 
 # Ideally we want to minimize the amount of radicals the user will have to learn, since they are not kanji themselves.
@@ -271,15 +136,15 @@ seen_radicals = set()
 seen_other = set()
 seen_name_kanji = set()
 seen_components = 0
-for kanji in joyo_kanji:
+for kanji in joyo:
     seen_components += len(kanji_dict[kanji]['comp_preferred'])
     for part in kanji_dict[kanji]['comp_preferred']:
-        if part not in joyo_kanji:
+        if part not in joyo:
             if '*' in part: 
                 seen_strokes.add(part[:-1])
             elif part in radicals:
                 seen_radicals.add(part)
-            elif part in jinmeiyo_kanji:
+            elif part in jinmeiyo:
                 seen_name_kanji.add(part)
             else:
                 seen_other.add(part)
@@ -293,7 +158,7 @@ print(seen_name_kanji)
 print(f"User will encounter {len(seen_other)} extra kanji")
 print(seen_other)
 print(f"User will encounter {seen_components} components")
-print(len(joyo_kanji))
+print(len(joyo))
 
 # Most repeated component in a kanji? 
 # 傘 has 6 components: ['人', '人', '人', '人', '人', '十']

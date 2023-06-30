@@ -51,18 +51,14 @@ def writeOutput(data, output):
 	if PYTHON_VERSION_MAJOR >= 3:
 		output.write(data)
 		return
-	
-	global lossInWeirdEncoding
-	if output.encoding == None:
-		encoding = 'utf8'
-	else:
-		encoding = output.encoding
 
+	global lossInWeirdEncoding
+	encoding = 'utf8' if output.encoding is None else output.encoding
 	encoded = data.encode(encoding, errors="replace")
-	if encoding != 'utf8' and encoding != 'utf-8':
+	if encoding not in ['utf8', 'utf-8']:
 		if encoded.decode(encoding) != data:
 			lossInWeirdEncoding = encoding
-	
+
 	output.write(encoded)
 
 # Summary generators
@@ -70,14 +66,14 @@ def writeOutput(data, output):
 def strokeGroupSummary(gr, indent = 0):
 	if not isinstance(gr, StrokeGr):
 		raise Exception("Invalid structure")
-	
+
 	ret = unicode(" " * indent * 4)
 	# ret += gr.element if gr.element is not None and len(gr.element) > 0 else "・"
 	ret += "- group"
 	if gr.element is not None and len(gr.element) > 0:
-		ret += " %s" % (gr.element,)
+		ret += f" {gr.element}"
 	if gr.position:
-		ret += " (%s)" % (gr.position,)
+		ret += f" ({gr.position})"
 
 	childStrokes = [s.stype for s in gr.childs if isinstance(s, Stroke) and s.stype]
 	if len(childStrokes):

@@ -3,7 +3,7 @@ from ast import literal_eval
 import csv
 
 from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
-from my_code.radicals import get_radicals
+from my_code.radicals import get_radicals, get_strokes
 
 # Convert string unicode to char
 str_unicode = "0x" + "2ED0"
@@ -30,8 +30,9 @@ def to_homoglyph(char):
     
     The preferred order goes like this:
     1. Joyo Kanji
-    2. Radicals
-    3. Jinmeiyo Kanji '''
+    2. Stokes (not always encoded as Stroke type)
+    3. Radicals
+    4. Jinmeiyo Kanji '''
     
     # Create mapping
     if homo_dict == {}:
@@ -39,6 +40,7 @@ def to_homoglyph(char):
             reader = csv.reader(mapping, delimiter=",")
 
             joyo = get_joyo_kanji()
+            strokes = get_strokes()
             radicals = get_radicals()
             jinmeiyo = get_jinmeiyo_kanji()
 
@@ -49,35 +51,26 @@ def to_homoglyph(char):
                 prefer = None # Preferred representation
 
                 # Check for joyo chars
-                if prefer is None:
-                    for homoglyph in row:
-                        if homoglyph in joyo:
-                            if prefer is None:
-                                prefer = homoglyph
-                            else:
-                                raise LookupError("Multiple joyo kanji considered homoglyphs")
-
-                # Check for radicals chars
-                if prefer is None:
-                    for homoglyph in row:
-                        if homoglyph in radicals:
-                            if prefer is None:
-                                prefer = homoglyph
-                            else:
-                                raise LookupError(f"Multiple radicals considered homoglyphs: {prefer}")
-
-                # Check for jinmeiyo chars
-                if prefer is None:
-                    for homoglyph in row:
-                        if homoglyph in jinmeiyo:
-                            if prefer is None:
-                                prefer = homoglyph
-                            else:
-                                raise LookupError("Multiple jinmeiyo considered homoglyphs")
+                prefer = find_in_char_set(joyo, row, prefer)
+                prefer = find_in_char_set(strokes, row, prefer)
+                prefer = find_in_char_set(radicals, row, prefer)
+                prefer = find_in_char_set(jinmeiyo, row, prefer)
 
                 if prefer is None:
                     continue
                 for alt_char in [c for c in row if c != prefer]:
                     homo_dict[alt_char] = prefer
+
     # Lookup the character
     return homo_dict[char] if char in homo_dict else char
+
+def find_in_char_set(char_set, homoglyphs, prefer):
+    ''' Unless we already prefer another char, loop through homoglyphs and return the one in the desired char_set'''
+    if prefer is None:
+        for homoglyph in homoglyphs:
+            if homoglyph in char_set:
+                if prefer is None:
+                    prefer = homoglyph
+                else:
+                    raise LookupError("Multiple chars from same char-set considered homoglyphs")
+    return prefer

@@ -3,12 +3,18 @@
         "childs",
         "elems",
         "hyogai",
+        "hyougai",
         "jinmeiyo",
+        "jouyou",
         "joyo",
         "kangxi",
+        "kanjivg",
         "realchr",
         "rfunc",
+        "Shinjitai",
         "stype",
+        "touyou",
         "unichr"
-    ]
+    ],
+    "xml.validation.enabled": false,
 }
