@@ -24,8 +24,7 @@ def check_for_stroke(kanji_obj):
     if type(kanji_obj) is Stroke:
         stroke = f"{to_homoglyph(kanji_obj.stype[0])}"
         isStroke = True
-    elif to_homoglyph(kanji_obj.element) in get_strokes():
-        stroke = f"{kanji_obj.element}"
+    elif (stroke := to_homoglyph(kanji_obj.element)) in get_strokes():
         isStroke = True
     
     return isStroke, stroke
@@ -38,7 +37,6 @@ def get_comp_list(kanji_obj, depth = 0, joyo = False):
     isStroke, stroke = check_for_stroke(kanji_obj)
     if isStroke: return [stroke]
         
-
     isComplete = kanji_obj.part is None
     element = to_homoglyph(kanji_obj.element)
     

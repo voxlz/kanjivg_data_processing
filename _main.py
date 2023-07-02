@@ -70,10 +70,10 @@ for char in joyo:
     }
 
 # Loop through all kanji and their components, adding not-yet-encountered components to the dictionary, counting occurrences along the way
-for char in joyo:
+for char in  joyo:
     kanji_obj = load_kanji(char)
-    comps     = get_comp_list_recursive(kanji_obj)
-    comps     = reduce_comps_recursive(comps, from_char=char)
+    comps          = get_comp_list_recursive(kanji_obj)
+    comps          = reduce_comps_recursive(comps, from_char=char)
     char_dict = count_occurrences(comps, char_dict, char)
 
 # How many have more than 'max_comps' components?
@@ -112,8 +112,33 @@ print(f"User will encounter {seen_components} components")
 print(len(joyo))
 
 # I want consistency in my kanji components. The same kanji should always be represented by the same components. I cannot trust that kanjivg has done this for me, especially since I've edited some kanji, so I will have to do it myself. Therefore I require a dictionary of all kanji + radicals -> most reduced form. It should be based primarily on the corresponding kanjivg entry, and if not present in joyo but part of another kanji, then the most reduced form of that kanji should also be added.
-a = char_dict['丶']
+
+for char in {'鑑', '猛', '漫', '環', '還', '価', '麓', '爵', '蔑', '益', '聴', '塩', '監', '皿'}:
+    print(f"{char}: {char_dict[char]['comps']}")
+    
+# Find components with identical components
+for char_a in char_dict:
+    for char_b in char_dict:
+        if char_a != char_b and char_dict[char_a]['comps'] != None and char_dict[char_a]['comps'] == char_dict[char_b]['comps']:
+            print("Identical comp list: ", char_a, char_b, char_dict[char_a]['comps'])
+
+a = char_dict['人']['comps']
+
 print()
+
+# todo: make sure the new radicals drag-on and amongus are inserted in the right places.
+
+# todo: Identical comp list:  ⽾ 朱 ['丿', '未'] - why is this happening?
+
+# todo: Identical comp list:  ⺋ ⼙ ['㇆', '㇟']
+
+# todo: 人,十,一 has itself as component? (write test for this.)
+
+# todo: deal with the 人, 八, 入 fiasco.
+
+# todo: define a "don't reduce" list of base components. For example, 人, 八, 入, 工,丅, 土, 士
+
+# todo: 𠂊 ⺈ should be reduced to one character, not two. Why do both have an entry?
 
 
 # Most repeated component in a kanji? 

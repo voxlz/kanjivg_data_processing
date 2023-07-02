@@ -9,7 +9,7 @@ To have a consistent variable naming convention, I will now break down and mysel
 | Compounds | 複合語 | Words made up of multiple kanji
 | Kanji | 漢, 字 | Defined as words in a dictionary
 | Contractions | 駦 | Neither kanji nor radical. Often made from two other kanji. May not be used in japanese.
-| Radicals | 亻, 𠂉 | A group of at least 2 strokes that occur in multiple kanji.
+| Radicals | 亻, 𠂉 | A group of 2-5 strokes that occur as component in kanji.
 | Strokes | ㇒, ㇑ | A single brush stroke.
 | Part / Component | ㇒, 字 | Part of another kanji, can be any of the above
 
@@ -23,9 +23,9 @@ To have a consistent variable naming convention, I will now break down and mysel
 
 Let's talk about some principles I'm going for here.
 
-1. **No duplicates**. If there are radicals that look identical to, are homoglyphs of, or are scaled version of kanji, or radicals that overlap with kanji, they should be considered identical. Learning the sun radical vs the sun kanji separably, for example, is a waste of time. Note: They have to have the correct strokes and order to be identical! Kanji and strokes are preferred over radicals.
+1. **No duplicates**. If there are any characters that look identical to each other(homoglyphs),  they should be considered identical. Learning the sun radical vs the sun kanji separably, for example, is a waste of time. Note: They have to have the correct strokes and order to be identical! Kanji and strokes are preferred over radicals.
 2. **6 components or less**. I want the user to be able to quickly input a kanji, so I will limit myself to 6 components or less. This is a bit arbitrary, but I think it's a good compromise between complexity and usability. This may force me to invent new radicals, but that's fine.
-3. **Keep proper stroke order**. Component input should be done in order. I find it ineffective to learn kanji without proper stroke order. This means that certain "proper" radicals components will be excluded, since they are not drawn in one go. '戈' in for example, where the first line is sometimes drawn before pausing and drawing other stuff, to later finish the radical. This would be 2 components in my system.
+3. **Keep proper stroke order**. Learning kanji means learning proper stroke order. Therefore I will not allow radicals that contain non consecutive strokes. '戈' for example, where the first line is sometimes drawn before pausing and drawing other stuff, to later finish the radical.
 4. **Keep it simple**. Unnecessary complexity should be avoided. If a radical is only used in one or two kanji, and I can make due without it (it won't increase components beyond 6 elsewhere), I will. This is to keep the number of radicals and additional kanjis down to a minimum, and to keep the system simple.
 
 ## Unicode blocks
@@ -40,6 +40,12 @@ Let's talk about some principles I'm going for here.
 
 Variants and Original characters. If it's a variant but has no original character, that means there is no proper unicode representation of the component, which is undesirable. Like 滕 with the top strokes leaning inward like 𣳾.
 
+## Radicals
+
+### Drawn Radical simplification
+
+Some radicals are written differently from their unicode representation. Ex. 人, 八, 入 are all written with two sloped strokes, but the unicode representation is different. 
+
 ### Custom radicals
 
 I have invented new radicals. This was due to not finding a good reduction of strokes with the available unicode characters.
@@ -47,8 +53,32 @@ I have invented new radicals. This was due to not finding a good reduction of st
 * ⿖ (amongus, 4 comps) : part of  薦,  鹿
 * ⿗ (drag-on, 5 comps) : part of 龍
 
-### Shin(j)i(tai) kanji
+### Positional radicals
+
+Certain radicals have multiple representations. Here follows a list of radical pars not considered homoglyphs, and if I consider them identical or not.
+
+#### Scaled versions
+
+These look identical and will be considered the same. (Fullsize character will be used)
+
+* 皿 | ⺲
+* 𠂊 | ⺈
+* 人 | 𠆢
+* 丄 | ⼇ (not joyo)
+* 卄 | 艹 (not joyo)
+
+#### Different strokes / stroke order
+
+These may come from a kanji, but look different / have different stroke order. They will be considered different.
+
+* 人 | ⺅
+
+#### Weird radicals
+
+* ?   | 龶  There does not seem to be a fullsize version of this positional...
+
+### Shiny (shinjitai) kanji
 
 Kanji where joyo is using old radical / version of kanji compared to shinjitai (extended).
 
-* 籠 Jōyō -> 篭 shinjitai
+* 籠 Jōyō -> 篭 shinjitai亠 

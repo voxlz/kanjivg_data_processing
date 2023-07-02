@@ -32,7 +32,8 @@ def to_homoglyph(char):
     1. Joyo Kanji
     2. Stokes (not always encoded as Stroke type)
     3. Radicals
-    4. Jinmeiyo Kanji '''
+    4. Jinmeiyo Kanji 
+    '''
     
     # Create mapping
     if homo_dict == {}:
@@ -62,7 +63,11 @@ def to_homoglyph(char):
                     homo_dict[alt_char] = prefer
 
     # Lookup the character
-    return homo_dict[char] if char in homo_dict else char
+    char = homo_dict[char] if char in homo_dict else char
+    
+    
+    
+    return char
 
 def find_in_char_set(char_set, homoglyphs, prefer):
     ''' Unless we already prefer another char, loop through homoglyphs and return the one in the desired char_set'''
