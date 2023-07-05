@@ -1,6 +1,6 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
 from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
-from my_code.kanjivg_utils import count_occurrences, expand_comps, find_similar, find_strokes, find_twins, get_comp_list_recursive, get_comp_list, simplify_comp_list, load_kanji, reduce_comps
+from my_code.kanjivg_utils import count_occurrences, expand_comps,  find_similar, find_strokes_and_depth, find_twins, get_comp_list_recursive, get_comps_depth, simplify_comp_list, load_kanji, reduce_comps
 from my_code.radicals import get_radicals, get_strokes
 from my_code.unicode import to_homoglyph
 
@@ -43,16 +43,18 @@ char_dict = {} # All joyo kanji and their components
 # Create a base dictionary of all joyo kanji
 for char in joyo:
     kanji_obj = load_kanji(char)
-    comps = get_comp_list(kanji_obj)
+    comps = get_comp_list_recursive(kanji_obj)
     comps = reduce_comps(comps, char)
     comps = simplify_comp_list(comps)
     char_dict[char] = {
         'comps'  : comps,      # The components of the character
         'from'   : char,      # Character that this component is originally from
         'joyo'   : True,       # Whether this character is a joyo kanji
+        'stroke'   : False,       # Whether this character is a joyo kanji
         'occur'  : 1,          # How often this char occurs as a comp, including itself
         'n_comps': len(comps),
         'derived': set(),        # Kanji this character occurs in
+        'parent': set(),   # Kanji this character occurs in directly
     }
 
 # Add not-yet-encountered components to the dictionary, counting occurrences along the way. Has to be done AFTER all joyo kanji are added to the dictionary, to have the kanjivg data as a baseline.
@@ -61,11 +63,62 @@ for char in  joyo:
     comps          = get_comp_list_recursive(kanji_obj)
     comps          = reduce_comps(comps, from_char=char)
     char_dict = count_occurrences(comps, char_dict, char)
-
+    
+    
+# -------------- CHAR DICT CREATED FOR ALL CHARACTERS -------------- #
+    
 for char in char_dict:
-    find_strokes(char, char_dict)
-    find_twins(char, char_dict)
-    find_similar(char, char_dict)
+    find_strokes_and_depth(char, char_dict)
+
+
+a = list(char_dict.items())
+a = list(sorted(a, key=lambda x:  len(x[1]['parent']), reverse=True))
+most_used_non_stroke = list(filter(lambda x: not x[1]['stroke'], a))
+
+b = list(char_dict.items())
+b = list(sorted(b, key=lambda x:  len(x[1]['parent']) + x[1]['depth'] / 10, reverse=False))
+b = list(filter(lambda x: not x[1]['joyo'], b)) # can't remove joyo kanji
+least_used_radicals = list(filter(lambda x: not x[1]['stroke'], b)) # can't remove strokes
+
+# Remove radicals that are not needed
+removable_radicals = set()
+for char in least_used_radicals:
+    
+    couldRemove = True
+    result = []
+
+    # Check if removing the radical would make the kanji have more than 6 components
+    for parent in char[1]['parent']:
+        comps: list = char_dict[parent]['comps'].copy()
+        while char[0] in comps:
+            idx = comps.index(char[0])
+            comps[idx:idx+1] = char[1]['comps']
+
+        assert comps != char_dict[parent]['comps'], "Comps should have changed"
+        
+        if len(comps) > 4:
+            couldRemove = False
+            break
+        else:
+            result.append({parent: (char_dict[parent]['comps'], comps)})
+
+    if couldRemove:
+        removable_radicals.add(char[0])
+        print(f"radical: {char[0]}")
+        for res in result:
+            print(res)
+
+            # char_dict.pop(char[0])            
+
+print(f"Removing {removable_radicals} could be benenfinal")
+
+if export := False: 
+    for char in char_dict:
+        find_twins(char, char_dict)
+
+    for char in char_dict:
+        find_similar(char, char_dict)
+
 
 # How many have more than 'max_comps' components?
 above_x_comps = [(char, info) for char, info in char_dict.items() if info['n_comps'] > max_comps]
@@ -102,29 +155,26 @@ print(seen_other)
 print(f"User will encounter {seen_components} components")
 print(len(joyo))
 
-for char in {'鑑', '猛', '漫', '環', '還', '価', '麓', '爵', '蔑', '益', '聴', '塩', '監', '皿'}:
-    print(f"{char}: {char_dict[char]['comps']}")
-
 # Print twin characters
 seen = set()
 for char in char_dict:
     if char in seen: continue
+    if "twins" not in char_dict[char]: break
+
     twins = char_dict[char]['twins']
     seen |= twins
     if len(twins) > 0:
         print("Identical comp list: ", twins | {char}, char_dict[char]['comps'])
 
-a = char_dict['為']
+
+
 
 print()
 
-# todo: make sure the new radicals drag-on and amongus are inserted in the right places.
-
-# todo: not allow radicals of 3 strokes to be reduced. (or 4?) 土 工 should not be  ['十', '一'], unnecessary reduction.
+for char in char_dict:
+    assert char not in char_dict[char]['comps'], f"Character {char} is in its own components"
 
 # todo: for when svg is not found, check all it's homoglyphs as well.
-
-# todo: huh:  㐅 ⼉ ['八'], ⼚ 丆 ['一', '㇒'], 由 田 ['⿙', '㇑', '二']
 
 # todo: Low prio: ensure all strokes in kanjivg path element are actually in stroke list.
 

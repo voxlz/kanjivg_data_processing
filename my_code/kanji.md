@@ -55,7 +55,7 @@ I have invented new radicals. This was due to not finding a good reduction of st
 * ⿗ (drag-on,  5 comps) : part of 龍
 * ⿘ (torch,       3 comps) : part of 減, 幾, 歳, etc.
 * ⿙ (bridge,     2 comps) : part of 皿
-* ⿚ (??, 3 comps) : part of 皿
+* ⿚ (??, 3 comps) : part of 皿 
 
 ### Positional radicals
 

@@ -3,7 +3,7 @@ import codecs
 
 def get_rules():
     do_not_reduce = [
-        "土","士","工","入","八", "口"
+        "土","士","工","入","八", "口", "王"
     ]
     
     reduction_rules = [
