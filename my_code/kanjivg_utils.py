@@ -33,28 +33,28 @@ def check_for_stroke(kanji_obj):
     
     return isStroke, stroke
 
-def get_comp_list(kanji_obj, depth = 0):
-    ''' Recursively move down the tree until you find a joyo kanji, radical or stroke. Returns a list of components.
-    '''
+# def get_comp_list(kanji_obj, depth = 0):
+#     ''' Recursively move down the tree until you find a joyo kanji, radical or stroke. Returns a list of components.
+#     '''
     
-    # Stroke is the innermost element, return it as is
-    isStroke, stroke = check_for_stroke(kanji_obj)
-    if isStroke: return [stroke]
+#     # Stroke is the innermost element, return it as is
+#     isStroke, stroke = check_for_stroke(kanji_obj)
+#     if isStroke: return [stroke]
         
-    isComplete = kanji_obj.part is None
-    element = to_homoglyph(kanji_obj.element)
+#     isComplete = kanji_obj.part is None
+#     element = to_homoglyph(kanji_obj.element)
     
-    if (depth != 0 and isComplete):
-        isRadical   = element in get_radicals()
-        isKanji     = element in get_valid_kanji()
+#     if (depth != 0 and isComplete):
+#         isRadical   = element in get_radicals()
+#         isKanji     = element in get_valid_kanji()
         
-        if isKanji or isRadical:
-            return [element]
+#         if isKanji or isRadical:
+#             return [element]
     
-    result = []
-    for child in kanji_obj.childs:
-        result.extend(get_comp_list(child, depth + 1))
-    return result
+#     result = []
+#     for child in kanji_obj.childs:
+#         result.extend(get_comp_list(child, depth + 1))
+#     return result
 
 def get_comp_list_recursive(kanji_obj):
     ''' Recursively creates an list of components for a kanji. '''
@@ -68,18 +68,19 @@ def get_comp_list_recursive(kanji_obj):
         if isStroke: 
             result.append(stroke)
             continue
-        
-        comp_tree    = get_comp_list_recursive(child)
+                
+        comp_tree  = get_comp_list_recursive(child)
+        strokes     = get_strokes_from_comps(comp_tree)
         element      = to_homoglyph(child.element)
 
         # Some things must be true for the element to be valid
         isExistent   = element is not None
         isComplete   = child.part is None
-        isPartial    = child.partial == "true"
+        isPartial     = child.partial == "true"
         isCOMPLETE   = isExistent and isComplete and not isPartial 
         
         # Then, if the element is a radical or joyo kanji, it is valid
-        isRadical    = element in get_radicals()
+        isRadical  = element in get_radicals()
         isKanji      = element in get_valid_kanji()
         isKANJI      = isRadical or isKanji
         
@@ -94,7 +95,7 @@ def get_comp_list_recursive(kanji_obj):
         
         # If valid, add current element to the list of components
         if isCOMPLETE and (isKANJI):
-            child_comps[element] = comp_tree
+            child_comps[element] = reduce_comps(comp_tree, element)
             result.append(child_comps)
         # If not a valid character, skip and go down the tree
         else:
@@ -120,7 +121,7 @@ def simplify_comp_list(comp_tree):
     return rtn
 
 def expand_comps(comps, char_dict):
-    ''' Takes a simplified comps list and expands it using char_dict. '''
+    ''' Takes a simplified comps list and expands it using char_dict. Ensures consistency.'''
     
     rtn = []
     # Either recursive tree or a stroke string
@@ -142,19 +143,14 @@ def get_strokes_from_comps(comps):
             rtn.extend(get_strokes_from_comps(char[list(char.keys())[0]]))
     return rtn
 
-def find_strokes_and_depth(char, char_dict):
+def set_strokes_parents_depth(char, char_dict):
     ''' Return comp list with strokes only recursively. '''
     
     comps = expand_comps(char_dict[char]['comps'], char_dict)
     
-    # Find and save direct parents for every component
-    for comp in comps:
-        if type(comp) is str:
-            # TODO
-    
-    
+    set_parents(char, comps, char_dict)
     strokes = get_strokes_from_comps(comps)
-    depth = get_comps_depth(comps)
+    depth = 1 + get_comps_depth(comps)
     
     char_dict[char] |= { 'strokes': strokes, 'depth': depth}
 
@@ -163,24 +159,30 @@ def get_lvl_str(comp_tree):
     
     return ",".join(simplify_comp_list(comp_tree))
 
-def reduce_comps(comp_list, from_char):
+def reduce_comps(comp_list, from_char, do_not_deduce_to=None):
     ''' Recursively reduce a list of components. Works on both recursive and non-recursive component lists. '''
         
     # Apply applicable reduction rules to comp_list
     reduction_rules, do_not_reduce = get_rules()
-    
-    # Don't reduce if less than 4 strokes
+
+    # * Don't reduce if less than 4 strokes
     strokes = get_strokes_from_comps(comp_list)
-    if len(strokes) < 5: 
+    if len(strokes) < 4: 
         return comp_list
-    
+
+    # * Don't reduce if character is banned from reduction
+    if from_char in do_not_reduce:
+        return comp_list
+
     for rule, result in reduction_rules:
 
-        # Skip if rule is not a reduction
-        if (result == from_char or from_char in do_not_reduce): 
+        # to avoid bad replacements
+        result = to_homoglyph(result)
+
+        # Skip if rule is not a valid reduction
+        if result in [from_char, do_not_deduce_to]: 
             continue 
-        
-        
+
         # Replace if rule is a reduction
         lvl_comps_str = ",".join(simplify_comp_list(comp_list))
         while (str_index := lvl_comps_str.find(rule)) != -1:
@@ -189,8 +191,10 @@ def reduce_comps(comp_list, from_char):
             sliced = slice(itm_index,itm_index+rule_len)
             if rule_len > 1:
                 comp_list[sliced] = [{result: comp_list[sliced]}]
-            else:
+            elif type(comp_list[itm_index]) is str:
                 comp_list[itm_index] = result
+            else:
+                comp_list[itm_index] = {result: comp_list[itm_index][rule]}
             lvl_comps_str = ",".join(simplify_comp_list(comp_list))
 
 
@@ -226,6 +230,7 @@ def count_occurrences(comps_recursive, char_dict, kanji):
                     'occur'  : 1,      # How often this char occurs as a comp, including itself
                     'n_comps': 0,
                     'derived': {kanji}, # Kanji 
+                    'parent': set(),   # Kanji this character occurs in directly
                 }
         else:
             char = list(comp.keys())[0]
@@ -236,7 +241,8 @@ def count_occurrences(comps_recursive, char_dict, kanji):
                 }
                 char_dict[char] = char_dict[char] | update
             else:
-                comps = simplify_comp_list(comp[char])
+                comps = reduce_comps(comp[char], char)
+                comps = simplify_comp_list(comps) # 
                 char_dict[char] = {
                     'comps'  : comps, # The components of the character
                     'from'   : kanji,      # Character that this component is originally from
@@ -244,7 +250,8 @@ def count_occurrences(comps_recursive, char_dict, kanji):
                     'stroke'   : False,  # Whether this character is a stroke
                     'occur'  : 1,          # How often this char occurs as a comp, including itself
                     'n_comps': len(comp[char]),
-                    'derived': {kanji}, # Kanji 
+                    'derived': {kanji}, # Kanji
+                    'parent': set(),   # Kanji this character occurs in directly
                 }
             
             # Recursively count occurrences of this component
@@ -264,15 +271,28 @@ def find_twins(char_a, char_dict):
             twins.add(char_b)
         
     char_dict[char_a] |= {'twins': twins}
+
+def set_parents(parent, comps, char_dict):
     
+    for char in comps:
+        if type(char) == dict:
+            child, child_comps = next(iter(char.items()))
+            char_dict[child]['parent'] |= {parent}
+            set_parents(child, child_comps, char_dict)
+        else:
+            char_dict[char]['parent'] |= {parent}
+    
+
 def get_comps_depth(comps):
-    '''Plot the depth of the comp list for each character'''
+    ''' Calculates the depth of a [{}, ''] comp tree. Essentially counts the amount of nested brackets. '''
     
-    depth = [1]
+    depth = [0]
     for char in comps:
         if type(char) == dict:
             c_comps = next(iter(char.values()))
             depth.append(1 + get_comps_depth(c_comps))
+        if type(char) == str:
+            depth.append(1)
         
     return max(depth)
     

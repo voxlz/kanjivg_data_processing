@@ -3,7 +3,7 @@ import codecs
 
 def get_rules():
     do_not_reduce = [
-        "土","士","工","入","八", "口", "王"
+        '土','士','工','入','八', '口', '王', '㐅', '亡', '互', '上', '下', '止'
     ]
     
     reduction_rules = [
@@ -15,6 +15,7 @@ def get_rules():
         ('𠆢', '人'),
         ('⼇', '丄'),
         ('艹', '卄'),
+        ('⺘', '才'),
         
         # Reduction Rules
         ('㇑,㇑,㇔,㇒,㇐', '业'),
@@ -40,18 +41,20 @@ def get_rules():
         ('㇑,㇕', '⿙'),
         ('㇐,巾','帀'),
         ('㇐,㇐', '二'),
-        ('㇔,㇒', '丷'),
         ('㇒,㇚', '刂'),
-        ('三,㇑', '龶'),
+        ('三,㇑', '龶'), # Turn into fullsize radical
         ('㇕,㇐', 'コ'),
         ('㇐,㇑', '十'),
+        ('㇔,㇒', '丷'),
+        ('㇔,㇔', '⺀'),
+        ('㇔,㇀', '冫'),
         # ('㇒,㇔', '八'),
         
         # Questionable rules
         ('丿,丶', '冫'), # Technically correct, could lead to more issues down the line...
         
         # Probably bad rules
-        ('㇒,㇏', '人'), 
+        # ('㇒,㇏', '人'), 
         # ('艹', '卄'), # They look the same :D
         # ('𠆢', '人'), 
         # ('⺈', '𠂊')   

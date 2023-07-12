@@ -28,6 +28,8 @@ Let's talk about some principles I'm going for here.
 3. **Keep proper stroke order**. Learning kanji means learning proper stroke order. Therefore I will not allow radicals that contain non consecutive strokes. '戈' for example, where the first line is sometimes drawn before pausing and drawing other stuff, to later finish the radical.
 4. **Keep it simple**. Unnecessary complexity should be avoided. If a radical is only used in one or two kanji, and I can make due without it (it won't increase components beyond 6 elsewhere), I will. This is to keep the number of radicals and additional kanjis down to a minimum, and to keep the system simple.
 5. **Consistency**. The same kanji should always be represented by the same components. I won't allow inconsistencies, as these lead to confusion and mistakes for new learners.
+6. **Shallow**. The component tree should be shallow. This means that the number of components between the root and the leafs should be small. This is to make it easier to learn the components, and to make it easier to input kanji. This practically means radicals and kanji with **less than 4 strokes will not be reduced**.
+7. **Proportions matter**. We won't consider ⼇ and 丄 to be the same, even though they are similar. This is because the proportions of the lines are different. Only rescaled radicals are allowed, not altered ones. This is to avoid confusion and mistakes for new learners.
 
 ## Unicode blocks
 
@@ -55,7 +57,7 @@ I have invented new radicals. This was due to not finding a good reduction of st
 * ⿗ (drag-on,  5 comps) : part of 龍
 * ⿘ (torch,       3 comps) : part of 減, 幾, 歳, etc.
 * ⿙ (bridge,     2 comps) : part of 皿
-* ⿚ (??, 3 comps) : part of 皿 
+* ⿚ (??, 3 comps) : part of 皿
 
 ### Positional radicals
 

@@ -1,6 +1,9 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
+from collections import defaultdict
+import matplotlib
+from matplotlib import pyplot
 from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
-from my_code.kanjivg_utils import count_occurrences, expand_comps,  find_similar, find_strokes_and_depth, find_twins, get_comp_list_recursive, get_comps_depth, simplify_comp_list, load_kanji, reduce_comps
+from my_code.kanjivg_utils import count_occurrences, find_similar, set_strokes_parents_depth, find_twins, get_comp_list_recursive, simplify_comp_list, load_kanji, reduce_comps
 from my_code.radicals import get_radicals, get_strokes
 from my_code.unicode import to_homoglyph
 
@@ -66,51 +69,13 @@ for char in  joyo:
     
     
 # -------------- CHAR DICT CREATED FOR ALL CHARACTERS -------------- #
-    
-for char in char_dict:
-    find_strokes_and_depth(char, char_dict)
 
+for char in char_dict:
+    set_strokes_parents_depth(char, char_dict)
 
 a = list(char_dict.items())
 a = list(sorted(a, key=lambda x:  len(x[1]['parent']), reverse=True))
 most_used_non_stroke = list(filter(lambda x: not x[1]['stroke'], a))
-
-b = list(char_dict.items())
-b = list(sorted(b, key=lambda x:  len(x[1]['parent']) + x[1]['depth'] / 10, reverse=False))
-b = list(filter(lambda x: not x[1]['joyo'], b)) # can't remove joyo kanji
-least_used_radicals = list(filter(lambda x: not x[1]['stroke'], b)) # can't remove strokes
-
-# Remove radicals that are not needed
-removable_radicals = set()
-for char in least_used_radicals:
-    
-    couldRemove = True
-    result = []
-
-    # Check if removing the radical would make the kanji have more than 6 components
-    for parent in char[1]['parent']:
-        comps: list = char_dict[parent]['comps'].copy()
-        while char[0] in comps:
-            idx = comps.index(char[0])
-            comps[idx:idx+1] = char[1]['comps']
-
-        assert comps != char_dict[parent]['comps'], "Comps should have changed"
-        
-        if len(comps) > 4:
-            couldRemove = False
-            break
-        else:
-            result.append({parent: (char_dict[parent]['comps'], comps)})
-
-    if couldRemove:
-        removable_radicals.add(char[0])
-        print(f"radical: {char[0]}")
-        for res in result:
-            print(res)
-
-            # char_dict.pop(char[0])            
-
-print(f"Removing {removable_radicals} could be benenfinal")
 
 if export := False: 
     for char in char_dict:
@@ -118,7 +83,6 @@ if export := False:
 
     for char in char_dict:
         find_similar(char, char_dict)
-
 
 # How many have more than 'max_comps' components?
 above_x_comps = [(char, info) for char, info in char_dict.items() if info['n_comps'] > max_comps]
@@ -165,6 +129,25 @@ for char in char_dict:
     seen |= twins
     if len(twins) > 0:
         print("Identical comp list: ", twins | {char}, char_dict[char]['comps'])
+
+depth = defaultdict(list)
+comps =  defaultdict(list)
+
+for char in char_dict:
+    depth[char_dict[char]['depth']].append(char)
+    comps[len(char_dict[char]['comps'])].append(char)
+
+assert len(comps[0]) == len(seen_strokes), "All strokes should be in comps[0]"
+
+x = list(depth.keys())
+y = list(map(lambda x: len(x), depth.values()))
+pyplot.figure("Depth")
+pyplot.bar(x, y)
+x = list(comps.keys())
+y = list(map(lambda x: len(x), comps.values()))
+pyplot.figure("Components")
+pyplot.bar(x, y)
+pyplot.show()
 
 
 
