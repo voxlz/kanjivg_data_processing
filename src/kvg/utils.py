@@ -30,22 +30,24 @@ class SvgFileInfo:
     def __init__(self, file, dir):
         self.path = os.path.join(dir, file)
         if file[-4:].lower() != ".svg":
-            raise Exception("File should have .svg exension. (%s)" % (str(self.path)))
+            raise Exception(f"File should have .svg exension. ({str(self.path)})")
         parts = (file[:-4]).split('-')
         if len(parts) == 2:
             self.variant = parts[1]
         elif len(parts) != 1:
-            raise Exception("File should have at most 2 parts separated by a dash. (%s)" % (str(file)))
+            raise Exception(
+                f"File should have at most 2 parts separated by a dash. ({str(file)})"
+            )
         self.id = parts[0]
         if self.id != canonicalId(self.id):
-            raise Exception("File name not in canonical format (%s)" % (str(self.path)))
+            raise Exception(f"File name not in canonical format ({str(self.path)})")
 
     def __repr__(self):
          return repr(vars(self))
 
     def read(self, SVGHandler=None):    
         if SVGHandler is None:
-            from kanjivg import SVGHandler
+            from kvg.kanjivg import SVGHandler
         handler = SVGHandler()
         parseXmlFile(self.path, handler)
         parsed = list(handler.kanjis.values())

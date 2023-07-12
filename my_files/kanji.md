@@ -19,18 +19,32 @@ To have a consistent variable naming convention, I will now break down and mysel
 1981: JGov announced jouyou kanji list (1,945 characters, 常用漢字表 = daily use kanji list)
 2010: JGov updated   jouyou kanji list (2,136 characters)
 
-## Principles
+## The KanjiKen System - Principles
 
 Let's talk about some principles I'm going for here.
 
-1. **No duplicates**. If there are any characters that look identical to each other(homoglyphs),  they should be considered identical. Learning the sun radical vs the sun kanji separably, for example, is a waste of time. Note: They have to have the correct strokes and order to be identical! Kanji and strokes are preferred over radicals.
-2. **6 components or less**. I want the user to be able to quickly input a kanji, so I will limit myself to 6 components or less. This is a bit arbitrary, but I think it's a good compromise between complexity and usability. This may force me to invent new radicals, but that's fine.
-3. **Keep proper stroke order**. Learning kanji means learning proper stroke order. Therefore I will not allow radicals that contain non consecutive strokes. '戈' for example, where the first line is sometimes drawn before pausing and drawing other stuff, to later finish the radical.
-4. **Keep it simple**. Unnecessary complexity should be avoided. If a radical is only used in one or two kanji, and I can make due without it (it won't increase components beyond 6 elsewhere), I will. This is to keep the number of radicals and additional kanjis down to a minimum, and to keep the system simple.
-5. **Consistency**. The same kanji should always be represented by the same components. I won't allow inconsistencies, as these lead to confusion and mistakes for new learners.
-6. **Shallow**. The component tree should be shallow. This means that the number of components between the root and the leafs should be small. This is to make it easier to learn the components, and to make it easier to input kanji. This practically means radicals and kanji with **less than 4 strokes will not be reduced**.
-7. **Proportions matter**. We won't consider ⼇ and 丄 to be the same, even though they are similar. This is because the proportions of the lines are different. Only rescaled radicals are allowed, not altered ones. This is to avoid confusion and mistakes for new learners.
+1. **No duplicates**. If there are any characters that look identical but are not, so called homoglyphs,  they should be considered identical. (Ex. ㇁ == ㇓)
+2. **No variations**. For two components to be considered identical, they need to have matching stroke type, stroke order, and stroke propotions. (Ex. ⺅ !=  人 | ⼇ != 丄)
+3. **Max 6 components**. Every character is broken down to 2-6 components, ideally 4. This is a good compromise between complexity and usability.
+4. **Keep stroke order**. Components that contain non consecutive strokes, i.e. pausing the component to draw something else,  are not allowed. (Ex. 口 and 戈)
+5. **Prune components**. If a component can be removed without breaking any above rule, and it does not push component count beyond 4  elsewhere, it should be.
+6. **Consistency**. A character should always be represented by the same components. Inconsistencies are not allowed, due to the induced complexity.
+7. **Shallowness**. Certain components with 3 strokes can be broken down into 2 components. To avoid unnessesary depth, this is not allowed. (Ex. 士 != [十 + 一])
 
+These rules ensure that knowing the components of a characters is knowing how to draw the character. That is the goal of the KanjiKen system.
+
+## The KanjiKen Order
+
+Which order you should learn the characters in depends on the learner.
+
+1. Never learn a character before you know all its components.
+2. Prioritize learning characters that are more common.
+
+Should you learn 番 or 万 first?
+
+
+
+番 =  ['⾤', '田']
 ## Unicode blocks
 
 * Kangxi radicals: 2F00–2FD5

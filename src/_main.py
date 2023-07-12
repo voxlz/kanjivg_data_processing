@@ -1,11 +1,11 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
 from collections import defaultdict
-import matplotlib
+import csv
 from matplotlib import pyplot
-from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
-from my_code.kanjivg_utils import count_occurrences, find_similar, set_strokes_parents_depth, find_twins, get_comp_list_recursive, simplify_comp_list, load_kanji, reduce_comps
-from my_code.radicals import get_radicals, get_strokes
-from my_code.unicode import to_homoglyph
+from kanji import get_jinmeiyo_kanji, get_joyo_kanji
+from kanjivg_utils import count_occurrences, find_similar, set_strokes_parents_depth, find_twins, get_comp_list_recursive, simplify_comp_list, load_kanji, reduce_comps
+from radicals import get_radicals, get_strokes
+from unicode import to_homoglyph
 
 
 # Program limits
@@ -70,8 +70,18 @@ for char in  joyo:
     
 # -------------- CHAR DICT CREATED FOR ALL CHARACTERS -------------- #
 
+# Attempt prioritizing kanji
+with open("data/scriptin-kanji-frequency/book_characters.csv", "r", encoding="utf8") as mapping:
+    reader = csv.reader(mapping, delimiter=",")
+    reader.next()
+    reader.next()
+    
+    for row in reader:
+        
+
 for char in char_dict:
     set_strokes_parents_depth(char, char_dict)
+    
 
 a = list(char_dict.items())
 a = list(sorted(a, key=lambda x:  len(x[1]['parent']), reverse=True))

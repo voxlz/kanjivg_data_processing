@@ -1,16 +1,17 @@
-from kanjivg import Stroke
-from my_code.kanji import get_joyo_kanji, get_valid_kanji
-from my_code.radicals import get_radicals, get_strokes
-from my_code.reduction import get_rules
-from my_code.tree import Tree
-from my_code.unicode import to_homoglyph
-from utils import canonicalId, listSvgFiles
+import os
+from kvg.kanjivg import Stroke
+from kanji import get_valid_kanji
+from radicals import get_radicals, get_strokes
+from reduction import get_rules
+from tree import Tree
+from unicode import to_homoglyph
+from kvg.utils import canonicalId, listSvgFiles
 from difflib import SequenceMatcher
 
 def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
-svg_file_list = listSvgFiles("./kanji/")
+svg_file_list = listSvgFiles(os.path.abspath("./kanji /"))
 
 def load_kanji(kanji):
     ''' Load the kanji from the kanji-svg database. '''

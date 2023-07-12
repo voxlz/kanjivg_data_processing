@@ -10,7 +10,7 @@ def get_joyo_kanji():
     if file_jouyou != set(): 
         return file_jouyou
         
-    with open("my_files/joyo2010.tsv", "r", encoding="utf8") as kanji_file:
+    with open("data/joyo2010.tsv", "r", encoding="utf8") as kanji_file:
         reader = csv.reader(kanji_file, delimiter="\t")
 
         # Skip the first row, which is just the source link
@@ -29,7 +29,7 @@ def get_jinmeiyo_kanji():
     if jinmeiyo != set(): 
         return jinmeiyo
     
-    with open("my_files/jinmeiyo.csv", "r", encoding="utf8") as kanji_file:
+    with open("data/jinmeiyo.csv", "r", encoding="utf8") as kanji_file:
         tsv_reader = csv.reader(kanji_file, delimiter=",")
 
         # Skip the first row, which is just the source link

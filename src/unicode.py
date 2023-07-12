@@ -2,8 +2,8 @@
 from ast import literal_eval
 import csv
 
-from my_code.kanji import get_jinmeiyo_kanji, get_joyo_kanji
-from my_code.radicals import get_radicals, get_strokes
+from kanji import get_jinmeiyo_kanji, get_joyo_kanji
+from radicals import get_radicals, get_strokes
 
 # Convert string unicode to char
 str_unicode = "0x" + "2ED0"
@@ -37,7 +37,7 @@ def to_homoglyph(char):
     
     # Create mapping
     if homo_dict == {}:
-        with open("my_files/homoglyphs.csv", "r", encoding="utf8") as mapping:
+        with open("data/homoglyphs.csv", "r", encoding="utf8") as mapping:
             reader = csv.reader(mapping, delimiter=",")
 
             strokes = get_strokes()

@@ -9,7 +9,7 @@ def get_radicals():
     if kangxi_radicals != set(): 
         return kangxi_radicals
     
-    with open("my_files/radicals_kangxi.csv", "r", encoding="utf8") as radical_file:
+    with open("data/radicals_kangxi.csv", "r", encoding="utf8") as radical_file:
         reader = csv.reader(radical_file)
 
         for row in reader:
@@ -30,7 +30,7 @@ def get_strokes():
     if CJK_strokes != set(): 
         return CJK_strokes
     
-    with open("my_files/strokes.csv", "r", encoding="utf8") as file:
+    with open("data/strokes.csv", "r", encoding="utf8") as file:
         reader = csv.reader(file)
 
         for row in reader:
@@ -47,7 +47,7 @@ def hex_to_unicode_str(hex_str):
     return hex_str.replace("0x", "\\u").encode('utf-8').decode('unicode-escape')
 
 radical_kanji_mapping = {}
-with open("my_files/kanji_radical_mapping.csv", "r", encoding="utf8") as mapping:
+with open("data/kanji_radical_mapping.csv", "r", encoding="utf8") as mapping:
     tsv_reader = csv.reader(mapping, delimiter=",")
 
     # Skip the first row, which is just the source link

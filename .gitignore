@@ -3,4 +3,4 @@ kanjivg.xml
 *.pyc
 kanjivg-*xml.gz
 kanjivg-*.zip
-my_files/**/*
+data/**/*
