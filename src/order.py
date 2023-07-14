@@ -131,9 +131,5 @@ def set_learn_order(char_dict):
         assert len(learn_order) == len(set(learn_order)), "Learn order contains duplicates"
         for i, char in enumerate(learn_order):
             char_dict[char] |= {f'{medium}_rank': i}
-
-    print()
-    
-
-    
-    
+            if f'{medium}_occur' in char_dict[char]:
+                del char_dict[char][f'{medium}_occur']
