@@ -14,9 +14,6 @@ from src.unicode import to_homoglyph
 # Program limits
 max_comps = 6 # how many kanji parts to allow in UI for a single kanji
 
-# List of radicals to accept to reduce the number of components a kanji can have. Let's say... 8 components max.
-radicals_8 = []
-
 # Clear the cache of python 
 import importlib
 clear_cache = importlib.invalidate_caches()
