@@ -110,7 +110,6 @@ def set_char_meanings(char_dict):
         '僕' : "servant",
         '画' : "brush-stroke",
         '舞' : "whirling dance",
-        '隊' : "regiment",
         # --- Creation ---
         '工' : "construct",
         '造' : "create",
@@ -170,27 +169,32 @@ def set_char_meanings(char_dict):
         '暗' : "dark",
         '冥' : "gloom",
         # --- Sadness ---
+        '憂' : "melancholy",
+        '鬱' : "depression",
         '悲' : "sad",
         '哀' : "pathetic",
         '嘆' : "grief",
-        '悼' : "mourning",
-        '憂' : "lament",
-        '鬱' : "melancholy",
-        # -------------
-        '咽' : "choked",
-        '没' : "death",
+        '悼' : "lament",
+        '忌' : "mourning",
+         # --- Fear ---
+        '慄' : "shiver",
+        '惧' : "threatened",
+        '恐' : "fear",
         # ---- Containers ----
         '丼' : "bowl",
         '鉢' : "pot",
         '鍋' : "pan",
         '蓋' : "lid",
-        # ----------------
-        '存' : "aware of",
-        '稽' : "practice",
-        # ---hide---
+        # --- Hide ---
         '蔽' : "conceal",
         '隠' : "hide",
         '匿' : "shelter",
+        # -------------
+        '咽' : "choked",
+        '没' : "death",
+        # ----------------
+        '存' : "aware of",
+        '稽' : "practice",
         # ---------
         '替' : "replace",
         '挫' : "sprain",
@@ -228,10 +232,6 @@ def set_char_meanings(char_dict):
         # -------- thinking ------
         '稽' : "thought",
         '考' : "consider",
-        # ------fear-------
-        '慄' : "shiver",
-        '惧' : "threatened",
-        '恐' : "fear",
         '虞' : "expectation",
         '畏' : "reverence",
         '和' : "japanese",
@@ -240,12 +240,13 @@ def set_char_meanings(char_dict):
         '曖' : "ambiguous",
         '恣' : "arbitrary",
         '陣' : "battle-array",
-        # ---- Group ----
+        # ---- Group ---- (avoid party)
         '派' : "faction",
         '閥' : "clique",
         '団' : "group",
         '党' : "alliance",
-        '隊' : "squad",
+        '隊' : "troop",
+        '班' : "team", # squad
         # --------------
         '営' : "occupation",
         '凡' : "commonplace",
