@@ -124,7 +124,7 @@ def set_learn_order(char_dict):
     
     ['book_characters.csv', 'news_characters.csv', 'wikipedia_characters.csv']
     
-    for medium in ['book', 'news', 'wikipedia']:
+    for medium in ['book']: #, 'news', 'wikipedia']:
         kanji_order, total, medium = get_sorted_joyo_frequencies(char_dict, medium)
         queue = init_queue(kanji_order)
         learn_order = prioritize_learn_order(queue, char_dict, medium)

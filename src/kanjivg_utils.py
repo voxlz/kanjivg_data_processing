@@ -69,7 +69,7 @@ def get_comp_list_recursive(kanji_obj):
             continue
                 
         comp_tree  = get_comp_list_recursive(child)
-        strokes     = get_strokes_from_comps(comp_tree)
+        # strokes      = get_strokes_from_comps(comp_tree)
         element      = to_homoglyph(child.element)
 
         # Some things must be true for the element to be valid
@@ -79,9 +79,10 @@ def get_comp_list_recursive(kanji_obj):
         isCOMPLETE   = isExistent and isComplete and not isPartial 
         
         # Then, if the element is a radical or joyo kanji, it is valid
-        isRadical  = element in get_radicals()
-        isKanji      = element in get_valid_kanji()
-        isKANJI      = isRadical or isKanji
+        # ----- TEST: DO NOT LIMIT COMPONENTS TO JOYO KANJI -----
+        # isRadical  = element in get_radicals()
+        # isKanji      = element in get_valid_kanji()
+        # isKANJI      = isRadical or isKanji
         
         # Else, if not curriculum, check for red flags 
         # isVariant    = child.variant == "true" # This is inconsistent.
@@ -93,7 +94,7 @@ def get_comp_list_recursive(kanji_obj):
         #     print(f"Skipping {element} from {kanji_obj.element}")
         
         # If valid, add current element to the list of components
-        if isCOMPLETE and (isKANJI):
+        if isCOMPLETE: # and (isKANJI):
             child_comps[element] = reduce_comps(comp_tree, element)
             result.append(child_comps)
         # If not a valid character, skip and go down the tree

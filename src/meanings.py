@@ -2,6 +2,7 @@ import csv
 import itertools
 import json
 from xml.etree.ElementTree import iterparse
+from mergedeep import merge
 
 from src.tree import Tree
 
@@ -59,10 +60,16 @@ def get_meanings(char, wk, ka, kd2, override):
 def set_char_meanings(char_dict):
     ''' Set the meanings of each character in char_dict. 
     Goals:
-        1. Every char should have a unique primary meaning, and up to 2 secondary meanings.
-        2. Avoid giving radicals a meaning, since they will overlap with kanji. (Unless you manage to find a unique meaning for them)
+        1. Every joyo char should have a unique primary meaning, and up to 2 secondary meanings.
+        2. Group radicals (non-joyo) into groups:
+            1. Used kanji. These are rarer kanji that are used in words.
+                - These should have a unique meaning.
+            2. Radical (unique). Not used, not similar to other kanji.
+                - These should have a unique meaning.
+            3. Radical (alts). Not used, based / altered from other kanji.
+                - These should have a same meaning as other kanji + (radical).
         3. The meaning should be concise, ideally one word.
-        4. Consider common kanji usage while overridning meanings. (Don't mind alternate ways to write words)
+        4. Consider kanji usage while overridning meanings. (Don't focus on alternate spellings)
     '''
     
     # TODO: Radicals like ⾗ are their own non-joyo kanji (豕) and used in joyo kanji like 家. These should be given a meaning. Avoiding radicals might not be an option.
@@ -285,7 +292,7 @@ def set_char_meanings(char_dict):
         '非' : "not",
         '勿' : "must not",
         '莫' : "do not",
-        '毋' : "mother (radical)",
+        '毋' : "mom",
         '捉' : "capture",
         '宅' : "home",
         '載' : "placed on",
@@ -306,49 +313,77 @@ def set_char_meanings(char_dict):
 
         # -------------------------- JOYO END --------------------------
         
+        # ----------- Used in words --- (Unique meaning)
+        # --- Hyougai ---
+        '⾣': "sign of the bird" ,
+        '逢': "tryst", # private meeting between lovers 
+        '沓': "footwear",
+        '丄': "up",
+        '丅': "down",
+        '丞': "rescue", # only used in 丞相 (rescue minister)
+        '⼽': "capped torch", # due to ⿘, kanji called halberd
+        '⽦': "counter for animals",
+        '朋': "pal",
+        '吾': "me",
+        '云': "speak", # say already in use
+        '㑒': "unanimous",
+        '囬': "go round", #revolve alt 回
+        '𠀎': "grounded well", # from 井 (well)
+       
+        # ----- Not used alone, part of org kanji ---
+        '𧘇': "clothes (radical)",      # 衣  'clothes'
+        '习': "feather (radical)",      # 羽 'feather'
+        '业': "line up (radical)",       # 並 'line up'
+        '⺋': "knot (radical)",            # 節 'knot'                     !!!
+        '𠂉': "stretch",                          #  人  'person'
+        '𥫗': "bamboo (radical)",        # 竹 'bamboo'
+        '𠀉': "hill (radical)",            # 丘 'hill'
+        '丆': "cotton (radical)",       # From korean 면 (cotton) <- 綿 (wool)    !!!
+        '卄': "twenty (radical)",       # Variant from 廿 (twenty)
+        # ----- Not used alone, alternate to kanji ---
+        '⻟': "eat (radical)",              # 食 'eat'
+        '⻞': "food (radical)",            # 食 'eat'
+        '兹': "excess (radical)",       # Variant from 玆 (excess)
+
+        # ----------- Not used alone, not alternate
         # --- Custom ---
-        '⿖': "amongus (radical)",
-        '⿗': "kobold (radical)",
-        '⿘': "torch (radical)",
-        '⿙': "bridge (radical)",
-        '⿚': "table-flip (radical)",
+        '⿖': "open cage",
+        '⿗': "kobold",
+        '⿘': "torch",
+        '⿙': "cover",
+        '⿚': "table-flip",
+        'ᚇ': "dwarf",
         # --- Katakana ---
         '⼛': "mu (katakana)",
         'ン': "n (katakana)",
-        '𠂊': "ku (katakana)",
+        'ク': "ku (katakana)",
         '㐅': "me (katakana)",
         'コ': "ko (katakana)",
-        # --- Non-Dictionary Entry Characters ---
-        '丷': "horns",
-        '⺍': "grass (radical)",
-        '⺌': "unicorn",
+        'ヨ': "jo (katakana)",
+        # --- 
         '⺀': "repeat", # 棗 -> 枣
-        '𠂉': "gun (radical)",
+        '⺍': "top simplification", # 吅 → 𭕄 | 巛 → 𭕄 | 鼠 -> 鼡 (⺀⺀ → 𭕄) | 留 > 畄 (𠂎刀 > 𭕄)
+        '丷': "horns",
+        '⺌': "unicorn",
         '𠈌': "crowd",
-        '𧘇': "",
-        '⺋': "knot (radical)",
-        '㠯': "two mouths",
-        '卄' : "",
-        '𠚍': "herbs (radical)",
-        '朿': "thorn (radical)",
+        '㠯': "stacked mouths",
+        '𠚍': "sacrificial spirit", # Variant of 𠚊 'sacrificial spirit'
+        '朿': "spike",
         
         # --- Radical Variants of Kanji ---
-        '𥫗': "bamboo (radical)", #variant of 竹 (bamboo)
-        '⻟': "eat (radical)", # variant of 食 (eat)
-        '⻞': "food (radical)", # variant of 食 (eat)
-        '𠀉': "hill (radical)", # variant of 丘 (hill)
-        '⺖': "heart (radical)",
-        '⼺': "three (radical)",
-        '灬': "fire (radical)",
-        '⺨': "dog (radical)",
-        '⻍': "walk (radical)",
-        '⼏': "table (radical)",
-        '⺡': "water (radical)",
-        '⼶': "two-hands (radical)",
-        '⽾': "tree-branch tree (radical)",
-        '⾫': "old bird (radical)",
+
+        '⺖': "veins", # variant from 心 (heart)
+        '⼺': "three (radical)", # variant from 三 (three)
+        '灬': "embers", # variant from 火 (fire)
+        '⺨': "puppy", # variant from 犬 (dog)
+        '⻍': "hike", # variant from 辵 (walk)
+        '⼏': "workbench ", #
+        '⺡': "thaw", # variant from 水 (water)
+        '⼶': "two-hands (radical)", 
+        '⽾': "tree-branch tree", # variant from 木 (tree)
+        '⾫': "old bird (radical)", 
         '豸': "badger (radical)", # This does legit not help at all :D
-        '⽓': "steam (radical)",
+        '⽓': "air", # used in 気 (spirit, air) and 氧 (oxygen)
         '⺙': "folding chair (radical)",
         '开': "open (radical)",
         '⻖': "village (radical)",
@@ -361,27 +396,6 @@ def set_char_meanings(char_dict):
         # --- Shinmeiyoo (simplifications)---
         '坐': "squat",
         '彳': "stroll", # simplified from 行 (go)
-        # --- Hyougai ---
-        '⾣': "sign of the bird" ,
-        '逢': "tryst", # meeting between lovers 
-        '沓': "footwear",
-        '丄': "up",
-        '丅': "down",
-        '丞': "rescue", # only used in 丞相 (rescue minister)
-        '⼽': "capped torch", # due to ⿘, kanji called halberd
-        '⽦': "counter for animals",
-        '朋': "pal",
-        '吾': "me",
-        '云': "speak", # say already in use
-        '㑒': "unanimous",
-        '𧘇': "attire (radical)",
-        '业': "almost lined up",
-        '习': "wing (radical)",
-        '囬': "go round", #revolve alt 回
-        '𠀎': "grounded well", # from 井 (well)
-        '丆': "cotton (radical)", # From korean 면 (cotton) <- 綿 (wool)
-        '兹': "excess (alt)", # Variant from 玆 (excess)
-        '卄': "twenty (alt)", # Variant from 廿 (twenty)
         # --- Kyūjitai (where Shinjitai is joyo) ---
         '僉': "unanimous (traditional)", # only used in 僉僚 (all colleagues)
         '⿓': "dragon (traditional)",
@@ -471,7 +485,7 @@ def set_char_meanings(char_dict):
         if 'kd2_meanings' in result_dict:
             del result_dict['kd2_meanings']
         
-        char_dict[char] |= result_dict
+        merge(char_dict[char], result_dict)
 
     # Check and print if duplicate primary meanings
     if duplicate_primaries := {

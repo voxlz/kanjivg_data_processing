@@ -4,15 +4,18 @@
 
 To have a consistent variable naming convention, I will now break down and myself define different types of japanese characters.
 
-| Name | Example | Description |
-| --- | --- | ----------- |
-| Compounds | 複合語 | Words made up of multiple kanji
-| Kanji | 漢, 字 | Defined as words in a dictionary
+| Name                  | Example | Description |
+| ---                    | --- | ----------- |
+| Compounds       | 複合語 | Words made up of multiple kanji
+| Kanji                | 漢, 字 | Defined as words in a dictionary
 | Contractions | 駦 | Neither kanji nor radical. Often made from two other kanji. May not be used in japanese.
-| Radicals | 亻, 𠂉 | A group of 2-5 strokes that occur as component in kanji.
-| Strokes | ㇒, ㇑ | A single brush stroke.
+| Radicals          | 亻, 𠂉 | A group of 2-5 strokes that occur as component in kanji.
+| Strokes           | ㇒, ㇑ | A single brush stroke.
 | Part / Component | ㇒, 字 | Part of another kanji, can be any of the above
-
+| Okurigana         | 食べる | Kana that follows a kanji to make a word.
+| Jukujikun         | 熟字訓 (lit. compound char reading) | Kanji that are read as a word, but not as the sum of their parts.
+| Ateji | 当て字 | Kanji in compound that are used for their phonetic value, not their meaning.
+| Gikun | 義訓 | Kanji in compound that are used for their meaning, not their phonetic value.
 ## Kanji History
 
 1946: JGov announced touyou kanji list (1,850 characters, 当用漢字表 = present use kanji list, introduced Shinjitai (new character forms))
@@ -77,8 +80,11 @@ I have invented new radicals. This was due to not finding a good reduction of st
 
 contenders:
 
-* bottom part of 長, 喪, 喰, 食 | similar to 𧘇, 艮
+* Bottom part of 長, 喪, 喰, 食 | similar to 𧘇, 艮, 𠂎, 𠂈
 * Full-scale version of 龶
+* Slanted top box 冂 like in 月
+* ム  with straight first line, like in ⻟
+* ⻟ without the hat like in 剆、⻟
 
 ### Imperfect radicals
 
@@ -117,11 +123,17 @@ These may come from a kanji, but look different / have different stroke order. T
 
 To make matters worse, some characters are written differently from how they are precented in unicode. This is the case for 人, 八, 入, and possibly more. I will use the hand written strokes of these characters, since stroke order only matters when writing by hand, and we already care about that.
 
-### Shiny (shinjitai) and  kyūjitai kanji
+### Shiny system
+
+#### (shinjitai) and  kyūjitai kanji
 
 Kanji where joyo is using old radical / version of kanji compared to shinjitai (extended).
 
 * 籠 Jōyō -> 篭 shinjitai亠
+
+#### Old characters not in use
+
+Perhaps hiragana / katakana no longer in use?
 
 ### Different groupings of kanji characters
 
@@ -132,9 +144,9 @@ Kanji where joyo is using old radical / version of kanji compared to shinjitai (
 
 ### Difficulty levels
 
-* Kyōiku  - 1st to 6th grade (6 levels)
-* JLPT - N5 to N1 (5 levels)
-* Kanken - Level 10 to Level 1 (12 levels)
+* Kyōiku  - 1st to 6th grade (6 levels, 1026 char)
+* JLPT - N5 to N1 (5 levels, 2136 char)
+* Kanken - Lvl 10 to Lvl 1 (12 levels, 6 350)
 
 ### Japanese proficiency levels
 

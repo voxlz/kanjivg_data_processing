@@ -7,7 +7,7 @@ def set_kanken(char_dict):
     # Load kanken data from file
     with open('data/nihongo-pro.com/kanken.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
-    
+
         kanken = Tree()
         curr_lvl = 10
         for line in lines:
@@ -17,8 +17,10 @@ def set_kanken(char_dict):
                 curr_lvl = float(line.split(":")[0].split(" ")[-1])
             else:
                 kanken[curr_lvl] = line.split(" ")
-    
+
     for char in char_dict:
+        if char == "食": 
+            print("食")
         for lvl, kanji_list in kanken.items():
             if char in kanji_list:
                 char_dict[char]['general']['kanken'] = lvl

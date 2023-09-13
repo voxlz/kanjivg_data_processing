@@ -1,16 +1,15 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
 from collections import defaultdict
-import csv
 from matplotlib import pyplot
-from src import trim_components
 from src.grade import set_kanken
 from src.kanjivg_utils import count_occurrences, find_similar, set_strokes_parents_depth, find_twins, get_comp_list_recursive, simplify_comp_list, load_kanji, reduce_comps
 from src.meanings import set_char_meanings
 from src.order import set_learn_order
 from src.unicode import get_jinmeiyo, get_joyo, get_radicals, get_strokes, to_homoglyph
+from src.word_frequency import set_word_examples
 
 # Program limits
-max_comps = 6 # how many kanji parts to allow in UI for a single kanji
+max_comps = 5 # how many kanji parts to allow in UI for a single kanji
 
 # Load all characters
 joyo             = get_joyo()
@@ -52,19 +51,24 @@ for char in  joyo:
     char_dict = count_occurrences(comps, char_dict, char)
 
 # -------------- CHAR DICT CREATED FOR ALL CHARACTERS -------------- #
-export = False
+export = True
 # TODO: Radical Reduction
 # trim_components(char_dict)
+# Calculate learn order
+    
+# Set word examples
+set_word_examples(char_dict)
 
+if export:
+    set_learn_order(char_dict)
+
+# Set difficulty grades
 set_kanken(char_dict)
 
 # Add meanings to all characters
-if True:
+if export:
     set_char_meanings(char_dict)
 
-# Calculate learn order
-if export:
-    set_learn_order(char_dict)
 
 for char in char_dict:
     set_strokes_parents_depth(char, char_dict)
@@ -74,7 +78,7 @@ a = list(char_dict.items())
 a = list(sorted(a, key=lambda x:  len(x[1]['parent']), reverse=True))
 most_used_non_stroke = list(filter(lambda x:  x[1]['general']['group'] != 'stroke', a))
 
-if export: 
+if False: 
     for char in char_dict:
         find_twins(char, char_dict)
         
@@ -89,6 +93,7 @@ if export:
         if len(twins) > 0:
             print("Identical comp list: ", twins | {char}, char_dict[char]['comps'])
 
+if True: 
     for char in char_dict:
         find_similar(char, char_dict)
 
@@ -136,6 +141,14 @@ for char in char_dict:
 
 # assert len(comps[0]) == len(seen_strokes), "All strokes should be in comps[0]"
 
+
+
+for char in char_dict:
+    assert char not in char_dict[char]['comps'], f"Character {char} is in its own components"
+
+
+print()
+
 x = list(depth.keys())
 y = list(map(lambda x: len(x), depth.values()))
 pyplot.figure("Depth")
@@ -146,13 +159,6 @@ pyplot.figure("Components")
 pyplot.bar(x, y)
 pyplot.show()
 
-
-
-
-print()
-
-for char in char_dict:
-    assert char not in char_dict[char]['comps'], f"Character {char} is in its own components"
 
 # todo: for when svg is not found, check all it's homoglyphs as well.
 
