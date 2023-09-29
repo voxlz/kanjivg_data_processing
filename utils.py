@@ -47,7 +47,7 @@ class SvgFileInfo:
 
     def read(self, SVGHandler=None):    
         if SVGHandler is None:
-            from kvg.kanjivg import SVGHandler
+            from src.kvg.kanjivg import SVGHandler
         handler = SVGHandler()
         parseXmlFile(self.path, handler)
         parsed = list(handler.kanjis.values())
