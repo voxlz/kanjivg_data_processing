@@ -1,12 +1,12 @@
 ## An attempt to create a dependency tree including all JoYo kanji based on their parts.
 from collections import defaultdict
 from matplotlib import pyplot
-from src.grade import set_kanken
-from src.kanjivg_utils import count_occurrences, find_similar, set_strokes_parents_depth, find_twins, get_comp_list_recursive, simplify_comp_list, load_kanji, reduce_comps
-from src.meanings import set_char_meanings
-from src.order import set_learn_order
-from src.unicode import get_jinmeiyo, get_joyo, get_radicals, get_strokes, to_homoglyph
-from src.word_frequency import set_word_examples
+from grade import set_kanken
+from kanjivg_utils import count_occurrences, find_similar, set_strokes_parents_depth, find_twins, get_comp_list_recursive, simplify_comp_list, load_kanji, reduce_comps
+from meanings import set_char_meanings
+from order import set_learn_order
+from unicode import get_jinmeiyo, get_joyo, get_radicals, get_strokes
+from word_frequency import set_word_examples
 
 # Program limits
 max_comps = 5 # how many kanji parts to allow in UI for a single kanji
@@ -23,7 +23,9 @@ assert joyo.isdisjoint(jinmeiyo)
 assert radicals.isdisjoint(jinmeiyo)
 
 # Look up all joyo kanji in the kanji-svg database
-char_dict = {} # All joyo kanji and their components 
+char_dict = {}      # All joyo kanji and their components 
+
+
 
 # Create a base dictionary of all joyo kanji
 for char in joyo:
@@ -51,19 +53,19 @@ for char in  joyo:
     char_dict = count_occurrences(comps, char_dict, char)
 
 # -------------- CHAR DICT CREATED FOR ALL CHARACTERS -------------- #
-export = True
+export = False
 # TODO: Radical Reduction
 # trim_components(char_dict)
 # Calculate learn order
     
 # Set word examples
-set_word_examples(char_dict)
 
 if export:
+    set_word_examples(char_dict)
     set_learn_order(char_dict)
 
-# Set difficulty grades
-set_kanken(char_dict)
+    # Set difficulty grades
+    set_kanken(char_dict)
 
 # Add meanings to all characters
 if export:
@@ -73,12 +75,11 @@ if export:
 for char in char_dict:
     set_strokes_parents_depth(char, char_dict)
 
-
 a = list(char_dict.items())
 a = list(sorted(a, key=lambda x:  len(x[1]['parent']), reverse=True))
 most_used_non_stroke = list(filter(lambda x:  x[1]['general']['group'] != 'stroke', a))
 
-if False: 
+if export: 
     for char in char_dict:
         find_twins(char, char_dict)
         
@@ -93,7 +94,7 @@ if False:
         if len(twins) > 0:
             print("Identical comp list: ", twins | {char}, char_dict[char]['comps'])
 
-if True: 
+if export: 
     for char in char_dict:
         find_similar(char, char_dict)
 

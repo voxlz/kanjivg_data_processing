@@ -152,3 +152,9 @@ Perhaps hiragana / katakana no longer in use?
 
 * JLPT - Japanese Language Proficiency Test
 * Kanken - Kanji Kentei (Kanji Aptitude Test)
+
+## Changes / Errors in joyo2010.tsv
+
+Turns out the joyo2010.tsv datalist has an error:
+・It uses 𠮟 over 叱 which seems to be the more common character code. I've corrected this.
+* 剝 is the added variant, but dictionaries use 剥 nowadays. I've changed to reflect this.

@@ -36,4 +36,5 @@
         "xmlhandler"
     ],
     "xml.validation.enabled": false,
+    "sourcery.codeLens": false,
 }

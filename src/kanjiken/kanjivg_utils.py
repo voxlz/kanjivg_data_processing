@@ -1,8 +1,8 @@
 import os
-from kvg.kanjivg import Stroke
+from kanjivg import Stroke
 from src.reduction import get_rules
 from src.tree import Tree
-from src.unicode import get_radicals, get_strokes, get_valid_kanji, to_homoglyph
+from src.unicode import get_radicals, get_strokes, to_homoglyph
 from kvg.utils import canonicalId, listSvgFiles
 from difflib import SequenceMatcher
 
@@ -109,7 +109,7 @@ def comps_from_tree(comp_tree):
     return list(map(lambda x: x if type(x) is str else list(x.keys())[0], comp_tree))
 
 def simplify_comp_list(comp_tree):
-    ''' Get the direct child components from component tree. '''
+    ''' Takes the component tree, and only returns the direct children, disregarding what those components are made out of. Get the direct child components from component tree. '''
     
     rtn = []
     # Either recursive tree or a stroke string
@@ -160,7 +160,7 @@ def get_lvl_str(comp_tree):
     return ",".join(simplify_comp_list(comp_tree))
 
 def reduce_comps(comp_list, from_char, do_not_deduce_to=None):
-    ''' Recursively reduce a list of components. Works on both recursive and non-recursive component lists. '''
+    ''' Use rules to insert and find components not currently in the database. Recursively reduces a list of components. Works on both recursive and non-recursive component lists. '''
         
     # Apply applicable reduction rules to comp_list
     reduction_rules, do_not_reduce = get_rules()

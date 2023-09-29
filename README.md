@@ -1,4 +1,4 @@
-## Run tests
+# Run tests
 
 ```bash
 $ python -m unittest
