@@ -22,10 +22,13 @@ from kanjivg import Stroke, StrokeGr
 from utils import listSvgFiles, readXmlFile, canonicalId, PYTHON_VERSION_MAJOR
 
 if PYTHON_VERSION_MAJOR > 2:
-	def unicode(s):
-		return s
-	def unichr(c):
-		return chr(c)
+
+    def unicode(s):
+        return s
+
+    def unichr(c):
+        return chr(c)
+
 
 helpString = """Usage: %s <find-svg|find-xml> <element1> [...elementN]
 
@@ -42,102 +45,125 @@ Parameters:
 Examples:
   %s find-svg 並      Will list SVG files describing given character.
   %s find-xml 4e26    Will list <kanji> entry for the same character.
-""" % (sys.argv[0], sys.argv[0], sys.argv[0])
+""" % (
+    sys.argv[0],
+    sys.argv[0],
+    sys.argv[0],
+)
 
 # Output helper
 
 lossInWeirdEncoding = False
+
+
 def writeOutput(data, output):
-	if PYTHON_VERSION_MAJOR >= 3:
-		output.write(data)
-		return
+    if PYTHON_VERSION_MAJOR >= 3:
+        output.write(data)
+        return
 
-	global lossInWeirdEncoding
-	encoding = 'utf8' if output.encoding is None else output.encoding
-	encoded = data.encode(encoding, errors="replace")
-	if encoding not in ['utf8', 'utf-8']:
-		if encoded.decode(encoding) != data:
-			lossInWeirdEncoding = encoding
+    global lossInWeirdEncoding
+    encoding = "utf8" if output.encoding is None else output.encoding
+    encoded = data.encode(encoding, errors="replace")
+    if encoding not in ["utf8", "utf-8"]:
+        if encoded.decode(encoding) != data:
+            lossInWeirdEncoding = encoding
 
-	output.write(encoded)
+    output.write(encoded)
+
 
 # Summary generators
 
-def strokeGroupSummary(gr, indent = 0):
-	if not isinstance(gr, StrokeGr):
-		raise Exception("Invalid structure")
 
-	ret = unicode(" " * indent * 4)
-	# ret += gr.element if gr.element is not None and len(gr.element) > 0 else "・"
-	ret += "- group"
-	if gr.element is not None and len(gr.element) > 0:
-		ret += f" {gr.element}"
-	if gr.position:
-		ret += f" ({gr.position})"
+def strokeGroupSummary(gr, indent=0):
+    if not isinstance(gr, StrokeGr):
+        raise Exception("Invalid structure")
 
-	childStrokes = [s.stype for s in gr.childs if isinstance(s, Stroke) and s.stype]
-	if len(childStrokes):
-		ret += "\n%s- strokes: %s" % (" " * (indent+1) * 4, ' '.join(childStrokes))
+    ret = unicode(" " * indent * 4)
+    # ret += gr.element if gr.element is not None and len(gr.element) > 0 else "・"
+    ret += "- group"
+    if gr.element is not None and len(gr.element) > 0:
+        ret += f" {gr.element}"
+    if gr.position:
+        ret += f" ({gr.position})"
 
-	ret += "\n"
+    childStrokes = [
+        s.element for s in gr.children if isinstance(s, Stroke) and s.element
+    ]
+    if len(childStrokes):
+        ret += "\n%s- strokes: %s" % (" " * (indent + 1) * 4, " ".join(childStrokes))
 
-	for g in gr.childs:
-		if isinstance(g, StrokeGr):
-			ret += strokeGroupSummary(g, indent + 1)
+    ret += "\n"
 
-	return ret
+    for g in gr.children:
+        if isinstance(g, StrokeGr):
+            ret += strokeGroupSummary(g, indent + 1)
+
+    return ret
+
 
 def characterSummary(c):
-	ret = f"Character summary: {c.code} ({c.strokes.element})"
-	if c.variant:
-		ret += f" - variant: {c.variant}"
-	ret += "\n"
-	ret += strokeGroupSummary(c.strokes)
-	return ret
+    ret = f"Character summary: {c.code} ({c.strokes.element})"
+    if c.variant:
+        ret += f" - variant: {c.variant}"
+    ret += "\n"
+    ret += strokeGroupSummary(c.strokes)
+    return ret
+
 
 # Commands
 
+
 def commandFindSvg(arg):
-	id = canonicalId(arg)
-	kanji = [(f.path, f.read()) for f in listSvgFiles("./kanji/") if f.id == id]
-	print("Found %d files matching ID %s" % (len(kanji), id))
-	for i, (path, c) in enumerate(kanji):
-		print("\nFile %s (%d/%d):" % (path, i+1, len(kanji)))
-		writeOutput(characterSummary(c) + "\n", sys.stdout)
+    id = canonicalId(arg)
+    kanji = [(f.path, f.read()) for f in listSvgFiles("./kanji/") if f.id == id]
+    print("Found %d files matching ID %s" % (len(kanji), id))
+    for i, (path, c) in enumerate(kanji):
+        print("\nFile %s (%d/%d):" % (path, i + 1, len(kanji)))
+        writeOutput(characterSummary(c) + "\n", sys.stdout)
+
 
 def commandFindXml(arg):
-	id = canonicalId(arg)
-	files = readXmlFile('./kanjivg.xml')
-	if id in files:
-		writeOutput(characterSummary(files[id]) + "\n", sys.stdout)
-	else:
-		writeOutput(unicode("Character %s (%s) not found.\n") % (id, unichr(int(id, 16))), sys.stdout)
+    id = canonicalId(arg)
+    files = readXmlFile("./kanjivg.xml")
+    if id in files:
+        writeOutput(characterSummary(files[id]) + "\n", sys.stdout)
+    else:
+        writeOutput(
+            unicode("Character %s (%s) not found.\n") % (id, unichr(int(id, 16))),
+            sys.stdout,
+        )
+
 
 # Main wrapper
 
 actions = {
-	"find-svg": (commandFindSvg, 2),
-	"find-xml": (commandFindXml, 2),
+    "find-svg": (commandFindSvg, 2),
+    "find-xml": (commandFindXml, 2),
 }
 
 if __name__ == "__main__":
-	if len(sys.argv) < 2 or sys.argv[1] not in actions.keys() or \
-		len(sys.argv) <= actions[sys.argv[1]][1]:
-		print(helpString)
-		sys.exit(0)
+    if (
+        len(sys.argv) < 2
+        or sys.argv[1] not in actions.keys()
+        or len(sys.argv) <= actions[sys.argv[1]][1]
+    ):
+        print(helpString)
+        sys.exit(0)
 
-	action = actions[sys.argv[1]][0]
-	args = sys.argv[2:]
+    action = actions[sys.argv[1]][0]
+    args = sys.argv[2:]
 
-	if len(args) == 0:
-		action()
-	else:
-		for f in args:
-			action(f)
-	
-	if lossInWeirdEncoding:
-		notice = """\nNotice: SOME CHARACTERS IN THE OUTPUT HAVE BEEN REPLACED WITH QUESTION MARKS.
+    if len(args) == 0:
+        action()
+    else:
+        for f in args:
+            action(f)
+
+    if lossInWeirdEncoding:
+        notice = """\nNotice: SOME CHARACTERS IN THE OUTPUT HAVE BEEN REPLACED WITH QUESTION MARKS.
         The text output has been encoded using your encoding of the standard
         output (%s). Try redirecting output to file if you can't get it to
-        work in terminal. e.g.: kvg-lookup.py find-svg 4e26 > output.txt\n""" % (lossInWeirdEncoding,)
-		writeOutput(notice, sys.stderr)
+        work in terminal. e.g.: kvg-lookup.py find-svg 4e26 > output.txt\n""" % (
+            lossInWeirdEncoding,
+        )
+        writeOutput(notice, sys.stderr)

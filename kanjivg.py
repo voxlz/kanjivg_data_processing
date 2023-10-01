@@ -19,8 +19,10 @@ from src.kvg.xmlhandler import *
 from src.kvg.utils import PYTHON_VERSION_MAJOR, canonicalId
 
 if PYTHON_VERSION_MAJOR > 2:
-	def unicode(s):
-		return s
+
+    def unicode(s):
+        return s
+
 
 # Sample licence header
 licenseString = """Copyright (C) 2009-2013 Ulrich Apel.
@@ -39,376 +41,482 @@ Under the following conditions:
 
 See http://creativecommons.org/licenses/by-sa/3.0/ for more details."""
 
+
 def isKanji(v):
-	return (v >= 0x4E00 and v <= 0x9FC3) or (v >= 0x3400 and v <= 0x4DBF) or (v >= 0xF900 and v <= 0xFAD9) or (v >= 0x2E80 and v <= 0x2EFF) or (v >= 0x20000 and v <= 0x2A6DF)
+    return (
+        (v >= 0x4E00 and v <= 0x9FC3)
+        or (v >= 0x3400 and v <= 0x4DBF)
+        or (v >= 0xF900 and v <= 0xFAD9)
+        or (v >= 0x2E80 and v <= 0x2EFF)
+        or (v >= 0x20000 and v <= 0x2A6DF)
+    )
+
 
 # Returns the unicode of a character in a unicode string, taking surrogate pairs into account
-def realord(s, pos = 0):
-	if s is None: return None
-	code = ord(s[pos])
-	if code >= 0xD800 and code < 0xDC00:
-		if (len(s) <= pos + 1):
-			print("realord warning: missing surrogate character")
-			return 0
-		code2 = ord(s[pos + 1])
-		if code2 >= 0xDC00 and code < 0xE000:
-			code = 0x10000 + ((code - 0xD800) << 10) + (code2 - 0xDC00)
-	return code
+def realord(s, pos=0):
+    if s is None:
+        return None
+    code = ord(s[pos])
+    if code >= 0xD800 and code < 0xDC00:
+        if len(s) <= pos + 1:
+            print("realord warning: missing surrogate character")
+            return 0
+        code2 = ord(s[pos + 1])
+        if code2 >= 0xDC00 and code < 0xE000:
+            code = 0x10000 + ((code - 0xD800) << 10) + (code2 - 0xDC00)
+    return code
+
 
 def realchr(i):
-	if i < 0x10000: return unichr(i)
-	else: return unichr(((i - 0x10000) >> 10) + 0xD800) + unichr(0xDC00 + (i & 0x3ff))
+    if i < 0x10000:
+        return unichr(i)
+    else:
+        return unichr(((i - 0x10000) >> 10) + 0xD800) + unichr(0xDC00 + (i & 0x3FF))
+
 
 class Kanji:
-	"""Describes a kanji. The root stroke group is accessible from the strokes member."""
-	def __init__(self, code, variant = None):
-		# Unicode of char being represented (standard str)
-		self.code = canonicalId(code)
-		# Variant of the character, if any
-		self.variant = variant
-		self.strokes = None
+    """Describes a kanji. The root stroke group is accessible from the strokes member."""
 
-	def __repr__(self):
-		return repr(vars(self))
+    def __init__(self, code, variant=None):
+        # Unicode of char being represented (standard str)
+        self.code = canonicalId(code)
+        # Variant of the character, if any
+        self.variant = variant
+        self.strokes = None
 
-	# String identifier used to uniquely identify the kanji
-	def kId(self):
-		ret = self.code
-		if self.variant:
-			ret += f"-{self.variant}"
-		return ret
+    def __repr__(self):
+        return repr(vars(self))
 
-	def outputStrokesNumbers(self, out, indent = 0):
-		strokes = self.getStrokes()
-		for cpt, stroke in enumerate(strokes, start=1):
-			stroke.numberToSVG(out, cpt, indent + 1)
+    # String identifier used to uniquely identify the kanji
+    def kId(self):
+        ret = self.code
+        if self.variant:
+            ret += f"-{self.variant}"
+        return ret
 
-	def outputStrokes(self, out, indent = 0):
-		self.strokes.toSVG(out, self.kId(), [0], [1])
+    def outputStrokesNumbers(self, out, indent=0):
+        strokes = self.getStrokes()
+        for cpt, stroke in enumerate(strokes, start=1):
+            stroke.numberToSVG(out, cpt, indent + 1)
 
-	def simplify(self):
-		self.strokes.simplify()
+    def outputStrokes(self, out, indent=0):
+        self.strokes.toSVG(out, self.kId(), [0], [1])
 
-	def getStrokes(self):
-		return self.strokes.getStrokes()
+    def simplify(self):
+        self.strokes.simplify()
+
+    def getStrokes(self):
+        return self.strokes.getStrokes()
 
 
 class StrokeGr:
-	"""Describes a stroke group belonging to a kanji as closely as possible to the XML format. Sub-stroke groups or strokes are available in the childs member. They can either be of class StrokeGr or Stroke so their type should be checked."""
-	def __init__(self, parent = None):
-		self.parent = parent
-		if parent: parent.childs.append(self)
-		# Element of StrokeGr
-		self.element = None
-		# A more common, safer element this one derives of
-		self.original = None
-		self.part = None
-		self.number = None
-		self.variant = False
-		self.partial = False
-		self.tradForm = False
-		self.radicalForm = False
-		self.position = None
-		self.radical = None
-		self.phon = None
-		
-		self.childs = []
+    """Describes a stroke group belonging to a kanji as closely as possible to the XML format. Sub-stroke groups or strokes are available in the.children member. They can either be of class StrokeGr or Stroke so their type should be checked."""
 
-	def __repr__(self):
-		return repr(vars(self))
+    def __init__(self, parent=None):
+        self.parent = parent
+        if parent:
+            parent.children.append(self)
+        # Element of StrokeGr
+        self.element = None
+        # A more common, safer element this one derives of
+        self.original = None
+        self.part = None
+        self.number = None
+        self.variant = False
+        self.partial = False
+        self.tradForm = False
+        self.radicalForm = False
+        self.position = None
+        self.radical = None
+        self.phon = None
 
-	def setParent(self, parent):
-		if self.parent is not None or parent is None:
-			raise "Set parent should only be set once! There is no cleanup for old parents."
-		parent.childs.append(self)
-		self.parent = parent
+        self.children = []
 
-	def toSVG(self, out, rootId, groupCpt = [0], strCpt = [1], indent = 0):
-		gid = rootId
-		if groupCpt[0] != 0:
-			gid += f"-g{str(groupCpt[0])}"
-		groupCpt[0] += 1
+    def __repr__(self):
+        return repr(vars(self))
 
-		idString = f' id="kvg:{gid}"'
-		eltString = f' kvg:element="{self.element}"' if self.element else ""
-		variantString = ' kvg:variant="true"' if self.variant else ""
-		partialString = ' kvg:partial="true"' if self.partial else ""
-		origString = f' kvg:original="{self.original}"' if self.original else ""
-		partString = ' kvg:part="%d"' % (self.part) if self.part else ""
-		numberString = ' kvg:number="%d"' % (self.number) if self.number else ""
-		tradFormString = ' kvg:tradForm="true"' if self.tradForm else ""
-		radicalFormString = ' kvg:radicalForm="true"' if self.radicalForm else ""
-		posString = f' kvg:position="{self.position}"' if self.position else ""
-		radString = f' kvg:radical="{self.radical}"' if self.radical else ""
-		phonString = f' kvg:phon="{self.phon}"' if self.phon else ""
-		out.write("\t" * indent + '<g%s%s%s%s%s%s%s%s%s%s%s%s>\n' % (idString, eltString, partString, numberString, variantString, origString, partialString, tradFormString, radicalFormString, posString, radString, phonString))
+    def setParent(self, parent):
+        if self.parent is not None or parent is None:
+            raise "Set parent should only be set once! There is no cleanup for old parents."
+        parent.children.append(self)
+        self.parent = parent
 
-		for child in self.childs:
-			child.toSVG(out, rootId, groupCpt, strCpt, indent + 1)
+    def toSVG(self, out, rootId, groupCpt=[0], strCpt=[1], indent=0):
+        gid = rootId
+        if groupCpt[0] != 0:
+            gid += f"-g{str(groupCpt[0])}"
+        groupCpt[0] += 1
 
-		out.write("\t" * indent + '</g>\n')
+        idString = f' id="kvg:{gid}"'
+        eltString = f' kvg:element="{self.element}"' if self.element else ""
+        variantString = ' kvg:variant="true"' if self.variant else ""
+        partialString = ' kvg:partial="true"' if self.partial else ""
+        origString = f' kvg:original="{self.original}"' if self.original else ""
+        partString = ' kvg:part="%d"' % (self.part) if self.part else ""
+        numberString = ' kvg:number="%d"' % (self.number) if self.number else ""
+        tradFormString = ' kvg:tradForm="true"' if self.tradForm else ""
+        radicalFormString = ' kvg:radicalForm="true"' if self.radicalForm else ""
+        posString = f' kvg:position="{self.position}"' if self.position else ""
+        radString = f' kvg:radical="{self.radical}"' if self.radical else ""
+        phonString = f' kvg:phon="{self.phon}"' if self.phon else ""
+        out.write(
+            "\t" * indent
+            + "<g%s%s%s%s%s%s%s%s%s%s%s%s>\n"
+            % (
+                idString,
+                eltString,
+                partString,
+                numberString,
+                variantString,
+                origString,
+                partialString,
+                tradFormString,
+                radicalFormString,
+                posString,
+                radString,
+                phonString,
+            )
+        )
 
+        for child in self.children:
+            child.toSVG(out, rootId, groupCpt, strCpt, indent + 1)
 
-	def components(self, simplified = True, recursive = False, level = 0):
-		ret = []
-		childsComp = []
-		for child in self.childs:
-			if isinstance(child, StrokeGr):
-				found = False
-				# Can we find the component in the child?
-				if simplified and child.original: ret.append(child.original); found = True
-				elif child.element: ret.append(child.element); found = True
-				# If not, the components we are looking for are the child's
-				# components - we also do that if we asked all the sub-components of the group
-				if not found or recursive:
-					newLevel = level
-					if found: newLevel += 1
-					childsComp += child.components(simplified, recursive, newLevel)
-		if recursive and ret: ret = [ level ] + ret + childsComp
-		return ret
+        out.write("\t" * indent + "</g>\n")
 
-	def simplify(self):
-		for child in self.childs: 
-			if isinstance(child, StrokeGr): child.simplify()
-		if len(self.childs) == 1 and isinstance(self.childs[0], StrokeGr):
-			# Check if there is no conflict
-			if child.element and self.element and child.element != self.element: return
-			if child.original and self.original and child.original != self.original: return
-			# Parts cannot be merged
-			if child.part and self.part and self.part != child.part: return
-			if child.variant and self.variant and child.variant != self.variant: return
-			if child.partial and self.partial and child.partial != self.partial: return
-			if child.tradForm and self.tradForm and child.tradForm != self.tradForm: return
-			if child.radicalForm and self.radicalForm and child.radicalForm != self.radicalForm: return
-			# We want to preserve inner identical positions - we may have something at the top
-			# of another top element, for instance.
-			if child.position and self.position: return
-			if child.radical and self.radical and child.radical != self.radical: return
-			if child.phon and self.phon and child.phon != self.phon: return
+    def components(self, simplified=True, recursive=False, level=0):
+        ret = []
+        childsComp = []
+        for child in self.children:
+            if isinstance(child, StrokeGr):
+                found = False
+                # Can we find the component in the child?
+                if simplified and child.original:
+                    ret.append(child.original)
+                    found = True
+                elif child.element:
+                    ret.append(child.element)
+                    found = True
+                # If not, the components we are looking for are the child's
+                # components - we also do that if we asked all the sub-components of the group
+                if not found or recursive:
+                    newLevel = level
+                    if found:
+                        newLevel += 1
+                    childsComp += child.components(simplified, recursive, newLevel)
+        if recursive and ret:
+            ret = [level] + ret + childsComp
+        return ret
 
-			# Ok, let's merge!
-			child = self.childs[0]
-			self.childs = child.childs
-			if child.element: self.element = child.element
-			if child.original: self.original = child.original
-			if child.part: self.part = child.part
-			if child.variant: self.variant = child.variant
-			if child.partial: self.partial = child.partial
-			if child.tradForm: self.tradForm = child.tradForm
-			if child.radicalForm: self.radicalForm = child.radicalForm
-			if child.position: self.position = child.position
-			if child.radical: self.radical = child.radical
-			if child.phon: self.phon = child.phon
+    def simplify(self):
+        for child in self.children:
+            if isinstance(child, StrokeGr):
+                child.simplify()
+        if len(self.children) == 1 and isinstance(self.children[0], StrokeGr):
+            # Check if there is no conflict
+            if child.element and self.element and child.element != self.element:
+                return
+            if child.original and self.original and child.original != self.original:
+                return
+            # Parts cannot be merged
+            if child.part and self.part and self.part != child.part:
+                return
+            if child.variant and self.variant and child.variant != self.variant:
+                return
+            if child.partial and self.partial and child.partial != self.partial:
+                return
+            if child.tradForm and self.tradForm and child.tradForm != self.tradForm:
+                return
+            if (
+                child.radicalForm
+                and self.radicalForm
+                and child.radicalForm != self.radicalForm
+            ):
+                return
+            # We want to preserve inner identical positions - we may have something at the top
+            # of another top element, for instance.
+            if child.position and self.position:
+                return
+            if child.radical and self.radical and child.radical != self.radical:
+                return
+            if child.phon and self.phon and child.phon != self.phon:
+                return
 
-	def getStrokes(self):
-		ret = []
-		for child in self.childs: 
-			if isinstance(child, StrokeGr): ret += child.getStrokes()
-			else: ret.append(child)
-		return ret
-		
+            # Ok, let's merge!
+            child = self.children[0]
+            self.children = child.children
+            if child.element:
+                self.element = child.element
+            if child.original:
+                self.original = child.original
+            if child.part:
+                self.part = child.part
+            if child.variant:
+                self.variant = child.variant
+            if child.partial:
+                self.partial = child.partial
+            if child.tradForm:
+                self.tradForm = child.tradForm
+            if child.radicalForm:
+                self.radicalForm = child.radicalForm
+            if child.position:
+                self.position = child.position
+            if child.radical:
+                self.radical = child.radical
+            if child.phon:
+                self.phon = child.phon
+
+    def getStrokes(self):
+        ret = []
+        for child in self.children:
+            if isinstance(child, StrokeGr):
+                ret += child.getStrokes()
+            else:
+                ret.append(child)
+        return ret
+
 
 class Stroke:
-	"""A single stroke, containing its type and (optionally) its SVG data."""
-	def __init__(self, parent):
-		self.stype = None
-		self.svg = None
-		self.numberPos = None
-		
-	def __repr__(self):
-		return repr(vars(self))
-	
-	def numberToSVG(self, out, number, indent = 0):
-		if self.numberPos:
-			out.write("\t" * indent + '<text transform="matrix(1 0 0 1 %.2f %.2f)">%d</text>\n' % (self.numberPos[0], self.numberPos[1], number)) 
+    """A single stroke, containing its type and (optionally) its SVG data."""
 
-	def toSVG(self, out, rootId, groupCpt, strCpt, indent = 0):
-		pid = f"{rootId}-s{str(strCpt[0])}"
-		strCpt[0] += 1
-		s = "\t" * indent + f'<path id="kvg:{pid}"'
-		if self.stype:
-			s += f' kvg:type="{self.stype}"'
-		if self.svg:
-			s += f' d="{self.svg}"'
-		s += '/>\n'
-		out.write(s)
+    def __init__(self, parent):
+        self.element = None
+        self.svg = None
+        self.numberPos = None
+        self.position = None
+        self.children = []
+
+    def __repr__(self):
+        return repr(vars(self))
+
+    def numberToSVG(self, out, number, indent=0):
+        if self.numberPos:
+            out.write(
+                "\t" * indent
+                + '<text transform="matrix(1 0 0 1 %.2f %.2f)">%d</text>\n'
+                % (self.numberPos[0], self.numberPos[1], number)
+            )
+
+    def toSVG(self, out, rootId, groupCpt, strCpt, indent=0):
+        pid = f"{rootId}-s{str(strCpt[0])}"
+        strCpt[0] += 1
+        s = "\t" * indent + f'<path id="kvg:{pid}"'
+        if self.element:
+            s += f' kvg:type="{self.element}"'
+        if self.svg:
+            s += f' d="{self.svg}"'
+        s += "/>\n"
+        out.write(s)
+
 
 class KanjisHandler(BasicHandler):
-	"""XML handler for parsing kanji files. It can handle single-kanji files or aggregation files. After parsing, the kanjis are accessible through the kanjis member, indexed by their svg file name."""
-	def __init__(self):
-		BasicHandler.__init__(self)
-		self.kanji = None
-		self.kanjis = {}
-		self.group = None
-		self.groups = []
-		self.compCpt = {}
-		self.metComponents = set()
+    """XML handler for parsing kanji files. It can handle single-kanji files or aggregation files. After parsing, the kanjis are accessible through the kanjis member, indexed by their svg file name."""
 
-	def handle_start_kanji(self, attrs):
-		if self.kanji is not None:
-			raise Exception("Kanji cannot be nested")
-		if self.group is not None:
-			raise Exception("Kanji cannot be inside a group")
-		if len(self.groups) != 0:
-			raise Exception("Previous kanji not closed correctly")
-		idType, idVariantStr = str(attrs["id"]).split("_")
-		if idType != "kvg:kanji":
-			raise Exception("Each kanji should have id formatted as kvg:kanji_XXXXX.")
-		idVariant = idVariantStr.split('-')
-		self.kanji = Kanji(*idVariant)
-		
+    def __init__(self):
+        BasicHandler.__init__(self)
+        self.kanji = None
+        self.kanjis = {}
+        self.group = None
+        self.groups = []
+        self.compCpt = {}
+        self.metComponents = set()
 
-	def handle_end_kanji(self):
-		if self.group is not None:
-			raise Exception("A group is not closed inside the kanji.")
-		if len(self.groups) != 1:
-			raise Exception("Kanji should have 1 root group.")
-		self.kanji.strokes = self.groups[0]
-		self.kanjis[self.kanji.code] = self.kanji
-		self.groups = []
-		self.kanji = None
+    def handle_start_kanji(self, attrs):
+        if self.kanji is not None:
+            raise Exception("Kanji cannot be nested")
+        if self.group is not None:
+            raise Exception("Kanji cannot be inside a group")
+        if len(self.groups) != 0:
+            raise Exception("Previous kanji not closed correctly")
+        idType, idVariantStr = str(attrs["id"]).split("_")
+        if idType != "kvg:kanji":
+            raise Exception("Each kanji should have id formatted as kvg:kanji_XXXXX.")
+        idVariant = idVariantStr.split("-")
+        self.kanji = Kanji(*idVariant)
 
-	def handle_start_g(self, attrs):
-		if self.kanji is None:
-			raise Exception("Stroke group must be inside a kanji")
-		group = StrokeGr(self.group)
+    def handle_end_kanji(self):
+        if self.group is not None:
+            raise Exception("A group is not closed inside the kanji.")
+        if len(self.groups) != 1:
+            raise Exception("Kanji should have 1 root group.")
+        self.kanji.strokes = self.groups[0]
+        self.kanjis[self.kanji.code] = self.kanji
+        self.groups = []
+        self.kanji = None
 
-		# Now parse group attributes
-		if "kvg:element" in attrs: group.element = unicode(attrs["kvg:element"])
-		if "kvg:variant" in attrs: group.variant = str(attrs["kvg:variant"])
-		if "kvg:partial" in attrs: group.partial = str(attrs["kvg:partial"])
-		if "kvg:original" in attrs: group.original = unicode(attrs["kvg:original"])
-		if "kvg:part" in attrs: group.part = int(attrs["kvg:part"])
-		if "kvg:number" in attrs: group.number = int(attrs["kvg:number"])
-		if "kvg:tradForm" in attrs and str(attrs["kvg:tradForm"]) == "true": group.tradForm = True
-		if "kvg:radicalForm" in attrs and str(attrs["kvg:radicalForm"]) == "true": group.radicalForm = True
-		if "kvg:position" in attrs: group.position = unicode(attrs["kvg:position"])
-		if "kvg:radical" in attrs: group.radical = unicode(attrs["kvg:radical"])
-		if "kvg:phon" in attrs: group.phon = unicode(attrs["kvg:phon"])
+    def handle_start_g(self, attrs):
+        if self.kanji is None:
+            raise Exception("Stroke group must be inside a kanji")
+        group = StrokeGr(self.group)
 
-		self.group = group
+        # Now parse group attributes
+        if "kvg:element" in attrs:
+            group.element = unicode(attrs["kvg:element"])
+        if "kvg:variant" in attrs:
+            group.variant = str(attrs["kvg:variant"])
+        if "kvg:partial" in attrs:
+            group.partial = str(attrs["kvg:partial"])
+        if "kvg:original" in attrs:
+            group.original = unicode(attrs["kvg:original"])
+        if "kvg:part" in attrs:
+            group.part = int(attrs["kvg:part"])
+        if "kvg:number" in attrs:
+            group.number = int(attrs["kvg:number"])
+        if "kvg:tradForm" in attrs and str(attrs["kvg:tradForm"]) == "true":
+            group.tradForm = True
+        if "kvg:radicalForm" in attrs and str(attrs["kvg:radicalForm"]) == "true":
+            group.radicalForm = True
+        if "kvg:position" in attrs:
+            group.position = unicode(attrs["kvg:position"])
+        if "kvg:radical" in attrs:
+            group.radical = unicode(attrs["kvg:radical"])
+        if "kvg:phon" in attrs:
+            group.phon = unicode(attrs["kvg:phon"])
 
-		if group.element: self.metComponents.add(group.element)
-		if group.original: self.metComponents.add(group.original)
+        self.group = group
 
-		if group.number:
-			if not group.part:
-				print(f"{self.kanji.kId()}: Number specified, but part missing")
-			# The group must exist already
-			if group.part > 1:
-				if (group.element + str(group.number)) not in self.compCpt:
-					print(f"{self.kanji.kId()}: Missing numbered group")
-				elif self.compCpt[group.element + str(group.number)] != group.part - 1:
-					print(f"{self.kanji.kId()}: Incorrectly numbered group")
-			elif (group.element + str(group.number)) in self.compCpt:
-				print(f"{self.kanji.kId()}: Duplicate numbered group")
-			self.compCpt[group.element + str(group.number)] = group.part
-		elif group.part:
-				# The group must exist already
-			if group.element not in self.compCpt:
-				if group.part > 1:
-					print(f"{self.kanji.kId()}: Incorrectly started multi-part group")
-			elif self.compCpt[group.element] != group.part - 1:
-				if group.part > 1:
-					print(f"{self.kanji.kId()}: Incorrectly splitted multi-part group")
-			self.compCpt[group.element] = group.part
+        if group.element:
+            self.metComponents.add(group.element)
+        if group.original:
+            self.metComponents.add(group.original)
 
-	def handle_end_g(self):
-		if self.group.parent is None:
-			self.groups.append(self.group)
-		self.group = self.group.parent
+        if group.number:
+            if not group.part:
+                print(f"{self.kanji.kId()}: Number specified, but part missing")
+            # The group must exist already
+            if group.part > 1:
+                if (group.element + str(group.number)) not in self.compCpt:
+                    print(f"{self.kanji.kId()}: Missing numbered group")
+                elif self.compCpt[group.element + str(group.number)] != group.part - 1:
+                    print(f"{self.kanji.kId()}: Incorrectly numbered group")
+            elif (group.element + str(group.number)) in self.compCpt:
+                print(f"{self.kanji.kId()}: Duplicate numbered group")
+            self.compCpt[group.element + str(group.number)] = group.part
+        elif group.part:
+            # The group must exist already
+            if group.element not in self.compCpt:
+                if group.part > 1:
+                    print(f"{self.kanji.kId()}: Incorrectly started multi-part group")
+            elif self.compCpt[group.element] != group.part - 1:
+                if group.part > 1:
+                    print(f"{self.kanji.kId()}: Incorrectly splitted multi-part group")
+            self.compCpt[group.element] = group.part
 
-	def handle_start_path(self, attrs):
-		if self.kanji is None or self.group is None:
-			raise Exception("Stroke must be inside a kanji and group!")
-		stroke = Stroke(self.group)
-		if "kvg:type" in attrs:
-			stroke.stype = unicode(attrs["kvg:type"])
-		if "d" in attrs: stroke.svg = unicode(attrs["d"])
-		self.group.childs.append(stroke)
+    def handle_end_g(self):
+        if self.group.parent is None:
+            self.groups.append(self.group)
+        self.group = self.group.parent
+
+    def handle_start_path(self, attrs):
+        if self.kanji is None or self.group is None:
+            raise Exception("Stroke must be inside a kanji and group!")
+        stroke = Stroke(self.group)
+        if "kvg:type" in attrs:
+            stroke.element = unicode(attrs["kvg:type"])
+        if "d" in attrs:
+            stroke.svg = unicode(attrs["d"])
+        self.group.children.append(stroke)
+
 
 class SVGHandler(BasicHandler):
-	"""SVG handler for parsing final kanji files. It can handle single-kanji files or aggregation files. After parsing, the kanji are accessible through the kanjis member, indexed by their svg file name."""
-	def __init__(self):
-		BasicHandler.__init__(self)
-		self.kanjis = {}
-		self.currentKanji = None
-		self.groups = []
-		self.metComponents = set()
+    """SVG handler for parsing final kanji files. It can handle single-kanji files or aggregation files. After parsing, the kanji are accessible through the kanjis member, indexed by their svg file name."""
 
-	def handle_start_g(self, attrs):
-		group = StrokeGr()
+    def __init__(self):
+        BasicHandler.__init__(self)
+        self.kanjis = {}
+        self.currentKanji = None
+        self.groups = []
+        self.metComponents = set()
 
-		# Special case for handling the root
-		if len(self.groups) == 0:
-			idType, idVariantStr = str(attrs["id"]).split("_")
-			idVariant = idVariantStr.split('-')
-			if idType == "kvg:StrokePaths":
-				pass
-			elif idType == "kvg:StrokeNumbers":
-				return
-			else:
-				raise Exception(f'Invalid root group id type ({str(attrs["id"])})')
-			self.currentKanji = Kanji(*idVariant)
-			self.kanjis[self.currentKanji.code] = self.currentKanji
-			self.compCpt = {}
-		else:
-			group.setParent(self.groups[-1])
+    def handle_start_g(self, attrs):
+        group = StrokeGr()
 
-		# Now parse group attributes
-		if "kvg:element" in attrs: group.element = unicode(attrs["kvg:element"])
-		if "kvg:variant" in attrs: group.variant = str(attrs["kvg:variant"])
-		if "kvg:partial" in attrs: group.partial = str(attrs["kvg:partial"])
-		if "kvg:original" in attrs: group.original = unicode(attrs["kvg:original"])
-		if "kvg:part" in attrs: group.part = int(attrs["kvg:part"])
-		if "kvg:number" in attrs: group.number = int(attrs["kvg:number"])
-		if "kvg:tradForm" in attrs and str(attrs["kvg:tradForm"]) == "true": group.tradForm = True
-		if "kvg:radicalForm" in attrs and str(attrs["kvg:radicalForm"]) == "true": group.radicalForm = True
-		if "kvg:position" in attrs: group.position = unicode(attrs["kvg:position"])
-		if "kvg:radical" in attrs: group.radical = unicode(attrs["kvg:radical"])
-		if "kvg:phon" in attrs: group.phon = unicode(attrs["kvg:phon"])
+        # Special case for handling the root
+        if len(self.groups) == 0:
+            idType, idVariantStr = str(attrs["id"]).split("_")
+            idVariant = idVariantStr.split("-")
+            if idType == "kvg:StrokePaths":
+                pass
+            elif idType == "kvg:StrokeNumbers":
+                return
+            else:
+                raise Exception(f'Invalid root group id type ({str(attrs["id"])})')
+            self.currentKanji = Kanji(*idVariant)
+            self.kanjis[self.currentKanji.code] = self.currentKanji
+            self.compCpt = {}
+        else:
+            group.setParent(self.groups[-1])
 
-		self.groups.append(group)
+        # Now parse group attributes
+        if "kvg:element" in attrs:
+            group.element = unicode(attrs["kvg:element"])
+        if "kvg:variant" in attrs:
+            group.variant = str(attrs["kvg:variant"])
+        if "kvg:partial" in attrs:
+            group.partial = str(attrs["kvg:partial"])
+        if "kvg:original" in attrs:
+            group.original = unicode(attrs["kvg:original"])
+        if "kvg:part" in attrs:
+            group.part = int(attrs["kvg:part"])
+        if "kvg:number" in attrs:
+            group.number = int(attrs["kvg:number"])
+        if "kvg:tradForm" in attrs and str(attrs["kvg:tradForm"]) == "true":
+            group.tradForm = True
+        if "kvg:radicalForm" in attrs and str(attrs["kvg:radicalForm"]) == "true":
+            group.radicalForm = True
+        if "kvg:position" in attrs:
+            group.position = unicode(attrs["kvg:position"])
+        if "kvg:radical" in attrs:
+            group.radical = unicode(attrs["kvg:radical"])
+        if "kvg:phon" in attrs:
+            group.phon = unicode(attrs["kvg:phon"])
 
-		if group.element: self.metComponents.add(group.element)
-		if group.original: self.metComponents.add(group.original)
+        self.groups.append(group)
 
-		if group.number:
-			if not group.part:
-				print(f"{self.currentKanji.kId()}: Number specified, but part missing")
-			# The group must exist already
-			if group.part > 1:
-				if group.element + str(group.number) not in self.compCpt:
-					print(f"{self.currentKanji.kId()}: Missing numbered group")
-				elif self.compCpt[group.element + str(group.number)] != group.part - 1:
-					print(f"{self.currentKanji.kId()}: Incorrectly numbered group")
-			elif (group.element + str(group.number)) in self.compCpt:
-				print(f"{self.currentKanji.kId()}: Duplicate numbered group")
-			self.compCpt[group.element + str(group.number)] = group.part
-		elif group.part:
-				# The group must exist already
-			if group.part > 1:
-				if group.element not in self.compCpt:
-					print(f"{self.currentKanji.kId()}: Incorrectly started multi-part group")
-				elif self.compCpt[group.element] != group.part - 1:
-					print(f"{self.currentKanji.kId()}: Incorrectly splitted multi-part group")
-			self.compCpt[group.element] = group.part
+        if group.element:
+            self.metComponents.add(group.element)
+        if group.original:
+            self.metComponents.add(group.original)
 
-	def handle_end_g(self):
-		if len(self.groups) == 0:
-			return
-		group = self.groups.pop()
-		# End of kanji?
-		if len(self.groups) == 1: # index 1 - ignore root group
-			self.currentKanji.strokes = group
-			self.currentKanji = None
-			self.groups = []
+        if group.number:
+            if not group.part:
+                print(f"{self.currentKanji.kId()}: Number specified, but part missing")
+            # The group must exist already
+            if group.part > 1:
+                if group.element + str(group.number) not in self.compCpt:
+                    print(f"{self.currentKanji.kId()}: Missing numbered group")
+                elif self.compCpt[group.element + str(group.number)] != group.part - 1:
+                    print(f"{self.currentKanji.kId()}: Incorrectly numbered group")
+            elif (group.element + str(group.number)) in self.compCpt:
+                print(f"{self.currentKanji.kId()}: Duplicate numbered group")
+            self.compCpt[group.element + str(group.number)] = group.part
+        elif group.part:
+            # The group must exist already
+            if group.part > 1:
+                if group.element not in self.compCpt:
+                    print(
+                        f"{self.currentKanji.kId()}: Incorrectly started multi-part group"
+                    )
+                elif self.compCpt[group.element] != group.part - 1:
+                    print(
+                        f"{self.currentKanji.kId()}: Incorrectly splitted multi-part group"
+                    )
+            self.compCpt[group.element] = group.part
 
-	def handle_start_path(self, attrs):
-		parent = None if len(self.groups) == 0 else self.groups[-1]
-		stroke = Stroke(parent)
-		if "kvg:type" in attrs:
-			stroke.stype = unicode(attrs["kvg:type"])
-		if "d" in attrs:
-			stroke.svg = unicode(attrs["d"])
-		self.groups[-1].childs.append(stroke)
+    def handle_end_g(self):
+        if len(self.groups) == 0:
+            return
+        group = self.groups.pop()
+        # End of kanji?
+        if len(self.groups) == 1:  # index 1 - ignore root group
+            self.currentKanji.strokes = group
+            self.currentKanji = None
+            self.groups = []
+
+    def handle_start_path(self, attrs):
+        parent = None if len(self.groups) == 0 else self.groups[-1]
+        stroke = Stroke(parent)
+        if "kvg:type" in attrs:
+            stroke.element = unicode(attrs["kvg:type"])
+        if "d" in attrs:
+            stroke.svg = unicode(attrs["d"])
+        self.groups[-1].children.append(stroke)
