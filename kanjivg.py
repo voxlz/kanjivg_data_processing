@@ -117,7 +117,7 @@ class StrokeGr:
         if parent:
             parent.children.append(self)
         # Element of StrokeGr
-        self.element = None
+        self.element: str = None
         # A more common, safer element this one derives of
         self.original = None
         self.part = None
@@ -278,8 +278,8 @@ class StrokeGr:
 class Stroke:
     """A single stroke, containing its type and (optionally) its SVG data."""
 
-    def __init__(self, parent):
-        self.element = None
+    def __init__(self, parent=None):
+        self.element: str = None
         self.svg = None
         self.numberPos = None
         self.position = None
