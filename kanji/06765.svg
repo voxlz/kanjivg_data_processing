@@ -38,9 +38,11 @@ See http://creativecommons.org/licenses/by-sa/3.0/ for more details.
 	<g id="kvg:StrokePaths_06765"
 		style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;">
 		<g id="kvg:06765" kvg:element="来">
-			<path id="kvg:06765-s1" kvg:type="㇐"
-				d="M25.54,28.33c1.61,0.39,4.58,0.53,6.19,0.39c16.32-1.46,27.01-3.46,43.69-3.67c2.69-0.03,4.31,0.18,5.65,0.38" />
-			<g id="kvg:06765-g1" kvg:element="米">
+			<g kvg:position="top">
+				<path id="kvg:06765-s1" kvg:type="㇐"
+					d="M25.54,28.33c1.61,0.39,4.58,0.53,6.19,0.39c16.32-1.46,27.01-3.46,43.69-3.67c2.69-0.03,4.31,0.18,5.65,0.38" />
+			</g>
+			<g id="kvg:06765-g1" kvg:element="米" kvg:position="bottom">
 				<path id="kvg:06765-s2" kvg:type="㇔" d="M30.12,37.62c2.85,2.07,7.16,7.91,7.88,11.12" />
 				<path id="kvg:06765-s3" kvg:type="㇒"
 					d="M74.52,33c0.08,0.98-0.11,1.9-0.58,2.77c-1.33,3.04-4.7,7.77-9.06,10.86" />
