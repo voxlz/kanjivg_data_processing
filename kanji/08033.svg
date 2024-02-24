@@ -41,7 +41,7 @@ See http://creativecommons.org/licenses/by-sa/3.0/ for more details.
 			<g kvg:position="top">
 				<path id="kvg:08033-s1" kvg:type="㇐" d="M20.25,20c3.03,0.85,6.17,0.58,9.24,0.21c14.62-1.76,31.45-3.95,48.12-5.06c3.33-0.22,6.59-0.2,9.89,0.35" />
 			</g>
-			<g kvg:position="bottom">
+			<g kvg:position="bottom" kvg:element="">
 				<!-- <g kvg:position="top" kvg:element="⿪"> -->
 				<path id="kvg:08033-s2" kvg:type="㇑a" d="M36.68,22.5c1.1,1.1,1.64,2.71,1.64,4.73c0,1.6-0.33,40.02-0.33,41.52" />
 				<path id="kvg:08033-s3" kvg:type="㇐a" d="M39.5,35.5c6.75-0.88,24-2.75,32.25-3.25" />
