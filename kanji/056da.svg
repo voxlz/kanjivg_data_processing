@@ -45,7 +45,7 @@ See http://creativecommons.org/licenses/by-sa/3.0/ for more details.
 				<path id="kvg:056da-s3" kvg:type="㇒" d="M54.08,26c0.55,1.5,0.9,3.7,0.61,5.61C52.96,42.92,46,71,29.83,82.68" />
 				<path id="kvg:056da-s4" kvg:type="㇏" d="M52.36,47.24c5.02,6.63,13.14,17.01,19.81,24.72c2.19,2.54,3.96,4.29,6.75,6.29" />
 			</g>
-			<g id="kvg:056da-g3" kvg:element="囗" kvg:part="2" kvg:position="kamae" kvg:radical="general">
+			<g id="kvg:056da-g3" kvg:position="kamae" kvg:radical="general">
 				<path id="kvg:056da-s5" kvg:type="㇐a" d="M21.5,93.51c16.25-0.51,48.71-2.6,66.75-3.01" />
 			</g>
 		</g>
