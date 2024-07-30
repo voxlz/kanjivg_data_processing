@@ -429,6 +429,7 @@ class SVGHandler(BasicHandler):
         self.met_components = OrderedSet([])
 
     def handle_start_g(self, attrs):
+        """Handle the start of a group element"""
         group = StrokeGr()
 
         # Special case for handling the root
