@@ -17,7 +17,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys, os, re, datetime
-from kanjivg import licenseString
+from kanjivg import LICENSE_STRING
 from utils import open
 
 pathre = re.compile(r'<path .*d="([^"]*)".*/>')
@@ -83,7 +83,7 @@ def release():
 def _extracted_from_release_(out, files, datadir, idMatchString):
     out.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     out.write("<!--\n")
-    out.write(licenseString)
+    out.write(LICENSE_STRING)
     out.write(
         "\nThis file has been generated on %s, using the latest KanjiVG data\nto this date."
         % (datetime.date.today())

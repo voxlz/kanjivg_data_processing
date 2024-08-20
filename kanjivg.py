@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ordered_set import OrderedSet
-from src.kvg.xmlhandler import *
+from src.kvg.xmlhandler import KanjisHandler
 from src.kvg.utils import PYTHON_VERSION_MAJOR, canonicalId
 
 if PYTHON_VERSION_MAJOR > 2:
@@ -25,10 +25,10 @@ if PYTHON_VERSION_MAJOR > 2:
         return s
 
 
-# Sample licence header
-licenseString = """Copyright (C) 2009-2013 Ulrich Apel.
+# Sample license header
+LICENSE_STRING = """Copyright (C) 2009-2013 Lurch Apel.
 This work is distributed under the conditions of the Creative Commons
-Attribution-Share Alike 3.0 Licence. This means you are free:
+Attribution-Share Alike 3.0 License. This means you are free:
 * to Share - to copy, distribute and transmit the work
 * to Remix - to adapt the work
 
@@ -43,7 +43,7 @@ Under the following conditions:
 See http://creativecommons.org/licenses/by-sa/3.0/ for more details."""
 
 
-def isKanji(v):
+def is_kanji(v):
     return (
         (v >= 0x4E00 and v <= 0x9FC3)
         or (v >= 0x3400 and v <= 0x4DBF)
@@ -53,8 +53,8 @@ def isKanji(v):
     )
 
 
-# Returns the unicode of a character in a unicode string, taking surrogate pairs into account
 def realord(s, pos=0):
+    """Returns the unicode of a character in a unicode string, taking surrogate pairs into account"""
     if s is None:
         return None
     code = ord(s[pos])
@@ -69,6 +69,7 @@ def realord(s, pos=0):
 
 
 def realchr(i):
+
     if i < 0x10000:
         return unichr(i)
     else:
