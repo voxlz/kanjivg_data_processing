@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ordered_set import OrderedSet
-from src.kvg.xmlhandler import KanjisHandler
+from src.kvg.xmlhandler import BasicHandler
 from src.kvg.utils import PYTHON_VERSION_MAJOR, canonicalId
 
 if PYTHON_VERSION_MAJOR > 2:
