@@ -281,21 +281,21 @@ class Stroke:
     """A single stroke, containing its type and (optionally) its SVG data."""
 
     def __init__(self, parent=None):
-        self.element: str = None
-        self.svg = None
-        self.numberPos = None
+        self.element: str | None = None
+        self.svg: str | None = None  # represents the path data string in the SVG
+        self.number_pos = None
         self.position = None
         self.children = []
 
     def __repr__(self):
         return repr(vars(self))
 
-    def numberToSVG(self, out, number, indent=0):
-        if self.numberPos:
+    def number_to_svg(self, out, number, indent=0):
+        if self.number_pos:
             out.write(
                 "\t" * indent
                 + '<text transform="matrix(1 0 0 1 %.2f %.2f)">%d</text>\n'
-                % (self.numberPos[0], self.numberPos[1], number)
+                % (self.number_pos[0], self.number_pos[1], number)
             )
 
     def toSVG(self, out, rootId, groupCpt, strCpt, indent=0):
