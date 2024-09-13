@@ -38,7 +38,7 @@ See http://creativecommons.org/licenses/by-sa/3.0/ for more details.
 	<g id="kvg:StrokePaths_08a00" style="fill:none;stroke:#000000;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;">
 		<g id="kvg:08a00" kvg:element="言" kvg:radical="general">
 			<g kvg:position="top">
-				<g kvg:position="top">
+				<g kvg:position="top" kvg:element="一">
 					<path id="kvg:08a00-s1" kvg:type="㇔" d="M48.38,11.25c4.38,2.5,8.88,7.75,10.38,11.5" />
 				</g>
 				<g kvg:element="三" kvg:position="bottom">
